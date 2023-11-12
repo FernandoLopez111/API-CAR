@@ -8,6 +8,7 @@ class Server{
 
   public static readonly PORT: number=3000
   public port: string | number
+  
 
   constructor(){
       this.app = express()

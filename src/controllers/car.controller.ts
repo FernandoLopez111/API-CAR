@@ -1,15 +1,16 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Car } from "../models/Car";
+import { DataSource } from "typeorm";
 
 
 class CarsController {
     //metodo de obtener todos
-    static listCars = async(req: Request, res: Response)=>{
+static listCars = async(req: Request, res: Response)=>{
         const repoCars = AppDataSource.getRepository(Car);
         try {
             const car = await repoCars.find({
-                where: {state:true},
+                where:{state:true},
             });
             return car.length>0
             ? res.json({
@@ -25,7 +26,7 @@ class CarsController {
             });
         }
     };
-//metodo de crear
+//crear carro
 static createCar = async(req:Request, res:Response)=>{
     const{owner,brand} = req.body;
     const repoCar = AppDataSource.getRepository(Car);
@@ -115,7 +116,27 @@ static deleteCar = async(req:Request, res:Response)=>{
         
     }
 };
-
+static listQuery = async(req: Request, res: Response)=>{
+    const {owner,brand} = req.query;
+    const repoCar =AppDataSource.getRepository(Car);
+   try {
+    const car = await repoCar.createQueryBuilder("car")
+    .where("car.owner = :owner OR car.brand = :brand ", {owner: owner, brand: brand, state:true})
+    .getOne()
+    return car
+    ? res.json({
+        ok: true,
+        msg: "OWNER OR BRAND IS",
+        car
+    })
+    : res.json({ok:false, msg:"DATA NOT FOUND", car});
+} catch (error) {
+    return res.json({
+        ok:false,
+        msg: `ERROR ==> ${error}`,
+    });
+}
+};
 }
 
 export default CarsController

@@ -37,7 +37,7 @@ CarsController.listCars = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
 });
-//metodo de crear
+//crear carro
 CarsController.createCar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { owner, brand } = req.body;
     const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
@@ -124,6 +124,28 @@ CarsController.deleteCar = (req, res) => __awaiter(void 0, void 0, void 0, funct
         return res.json({
             ok: false,
             msg: `ERROR==> ${error}`
+        });
+    }
+});
+CarsController.listQuery = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { owner, brand } = req.query;
+    const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
+    try {
+        const car = yield repoCar.createQueryBuilder("car")
+            .where("car.owner = :owner OR car.brand = :brand ", { owner: owner, brand: brand, state: true })
+            .getOne();
+        return car
+            ? res.json({
+                ok: true,
+                msg: "OWNER OR BRAND IS",
+                car
+            })
+            : res.json({ ok: false, msg: "DATA NOT FOUND", car });
+    }
+    catch (error) {
+        return res.json({
+            ok: false,
+            msg: `ERROR ==> ${error}`,
         });
     }
 });
