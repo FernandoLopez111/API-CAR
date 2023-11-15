@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { AppDataSource } from "../data-source";
+import { AppDataSource } from "../data-source"
 import { Car } from "../models/Car";
-import { DataSource } from "typeorm";
 
+// const carRepository = AppDataSource.getRepository(Car)
 
 class CarsController {
     //metodo de obtener todos
@@ -118,7 +118,7 @@ static deleteCar = async(req:Request, res:Response)=>{
 };
 static listQuery = async(req: Request, res: Response)=>{
     const {owner,brand} = req.query;
-    const repoCar =AppDataSource.getRepository(Car);
+    const repoCar = AppDataSource.getRepository(Car);
    try {
     const car = await repoCar.createQueryBuilder("car")
     .where("car.owner = :owner OR car.brand = :brand ", {owner: owner, brand: brand, state:true})
@@ -134,9 +134,9 @@ static listQuery = async(req: Request, res: Response)=>{
     return res.json({
         ok:false,
         msg: `ERROR ==> ${error}`,
-    });
+    })
 }
-};
+}
 }
 
 export default CarsController

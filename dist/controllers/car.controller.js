@@ -12,6 +12,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const data_source_1 = require("../data-source");
 const Car_1 = require("../models/Car");
+// const carRepository = AppDataSource.getRepository(Car)
 class CarsController {
 }
 _a = CarsController;

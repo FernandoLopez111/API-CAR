@@ -6,13 +6,13 @@ exports.AppDataSource = new typeorm_1.DataSource({
     type: "mysql",
     host: "localhost",
     username: "root",
-    password: "password",
+    password: "200409",
     port: 3306,
     database: "carwash-api",
     synchronize: true,
     logging: true,
     entities: ["dist/models/**/*.js"],
-    subscribers: ["dist/subscribers/**/*..js"],
-    migrations: ["dist/migrations/**/*.js"],
+    subscribers: ["dist/subscribers/**/*.js"],
+    migrations: ["dist/migrations/**/*.js"]
 });
 //# sourceMappingURL=data-source.js.map

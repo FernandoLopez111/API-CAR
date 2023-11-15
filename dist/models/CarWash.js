@@ -16,11 +16,11 @@ let CarWash = class CarWash {
 };
 exports.CarWash = CarWash;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("increment"),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], CarWash.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToMany)(() => Car_1.Car),
+    (0, typeorm_1.ManyToOne)(() => Car_1.Car),
     __metadata("design:type", Car_1.Car)
 ], CarWash.prototype, "car", void 0);
 __decorate([

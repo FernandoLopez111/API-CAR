@@ -6,7 +6,7 @@ import cors from 'cors'
 class Server{
   private app:Application
 
-  public static readonly PORT: number=3000
+  public static readonly PORT:number= 3000
   public port: string | number
   
 
@@ -18,8 +18,8 @@ class Server{
   middlewares(){   
     this.app.use(
       cors({
-          origin: ['http://localhost:5173', 'http://localhost:5174'],
-          credentials: true
+          origin: ["http://localhost:5173", "http://localhost:5174"],
+          credential: true
       })
   )
       this.app.use(morgan("dev"))

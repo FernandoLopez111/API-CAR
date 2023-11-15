@@ -15,7 +15,7 @@ let Car = class Car {
 };
 exports.Car = Car;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)("increment"),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], Car.prototype, "id", void 0);
 __decorate([
