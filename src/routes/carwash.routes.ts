@@ -1,15 +1,12 @@
-import {Router} from 'express'
-import CarwashController from '../controllers/carwash.controller'
+import { Router } from "express";
+import CarWashController from "../controllers/carwash.controller";
 
-const router = Router()
-const carwash = CarwashController
+const router = Router();
+const service = CarWashController;
 
-router.get('/serviceList', carwash.servicesList)
-  router.get('/', carwash.listCarWashs)
-router.patch('/', carwash.lisQuery)
-router.post('/', carwash.createCarwash)
-router.get('/:id', carwash.byIdCarWash )
-router.put('/:id', carwash.updateCarwash)
-router.delete('/:id', carwash.deleteCarWash)
-
-export default router
+router.get("/", service.listCarwash);
+router.post("/", service.createCarwash);
+router.get("/:id", service.byIdService);
+router.put("/:id", service.updateService);
+router.delete("/:id", service.deleteService);
+export default router;
