@@ -1,28 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, RelationId} from 'typeorm'
-import {Car} from './Car'
-
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, RelationId,CreateDateColumn} from 'typeorm'
+import { Client } from './Client'
 @Entity()
 export class CarWash{
-
     @PrimaryGeneratedColumn()
-
     id: number
-
-    @ManyToOne(()=>Car)
-    car : Car
-
-    @RelationId((carwash: CarWash)=>carwash.car)
-    carId: number
-
-
     @Column()
-
-    service: string
-
+    type:string
     @Column()
-    
-    price: string
-    
-    @Column({default:true})
-    state: boolean
-}
+    price:number
+    @ManyToOne(() => Client)
+    client: Client;
+    @RelationId((carwash:CarWash) => carwash.client)
+    clientId: number;
+    @Column()
+    amount: number;
+    @Column()
+    @CreateDateColumn()
+    date: Date;
+    @Column({ default: 0 })
+    subTotal: number;
+    @Column({ default: 0 })
+    total: number;
+   @Column({default:true})
+   state: boolean
+  }

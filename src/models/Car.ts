@@ -1,21 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column} from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, RelationId} from 'typeorm'
+import {Brand} from './Brand'
+import {Model} from './Model'
+
+
 
 @Entity()
 export class Car{
-
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn("increment")
     id: number
-
+    @ManyToOne(()=> Brand)
+    brand: Brand
+    @RelationId((car:Car)=>car.brand)
+    brandId : number
+    @ManyToOne(()=> Model)
+    model: Model
+    @RelationId((car:Car)=>car.model)
+    modelId : number
     @Column()
-
-    owner: string
-
+    name: string
     @Column()
-
-    brand : string
-    
+    serialnumber : number
     @Column({default:true})
     state: boolean
-
-    
+   
 }
