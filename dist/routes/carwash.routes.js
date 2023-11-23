@@ -5,14 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const carwash_controller_1 = __importDefault(require("../controllers/carwash.controller"));
+const tokenvalido_1 = require("../jwt/tokenvalido");
 const router = (0, express_1.Router)();
-const carwash = carwash_controller_1.default;
-router.get('/serviceList', carwash.servicesList);
-router.get('/', carwash.listCarWashs);
-router.patch('/', carwash.lisQuery);
-router.post('/', carwash.createCarwash);
-router.get('/:id', carwash.byIdCarWash);
-router.put('/:id', carwash.updateCarwash);
-router.delete('/:id', carwash.deleteCarWash);
+const service = carwash_controller_1.default;
+router.get("/", tokenvalido_1.ValidateToken, service.listCarwash);
+router.post("/", tokenvalido_1.ValidateToken, service.createCarwash);
+router.get("/:id", tokenvalido_1.ValidateToken, service.byIdService);
+router.put("/:id", tokenvalido_1.ValidateToken, service.updateService);
+router.delete("/:id", tokenvalido_1.ValidateToken, service.deleteService);
 exports.default = router;
 //# sourceMappingURL=carwash.routes.js.map

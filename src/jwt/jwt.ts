@@ -14,10 +14,3 @@ export const tokenAuth = async (user: User) => {
   );
 };
 
-export const TokenValidation= async(token: string)=>{
-  try {
-    return jwt.verify(token, process.env.SECRET_KEY)
-  } catch (error) {
-    null
-  }
-}

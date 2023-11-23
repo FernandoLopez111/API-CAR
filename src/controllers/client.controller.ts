@@ -14,7 +14,7 @@ class ClientsController {
         where: {
           state: true,
           name: Like(`%${name}%`),
-          car: { name: Like(`%${car}%`) },
+          car: { color: Like(`%${car}%`) },
         },
         relations: { car: true },
       });

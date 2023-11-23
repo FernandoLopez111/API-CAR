@@ -12,97 +12,177 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const data_source_1 = require("../data-source");
 const Car_1 = require("../models/Car");
-// const carRepository = AppDataSource.getRepository(Car)
+const typeorm_1 = require("typeorm");
+const Model_1 = require("../models/Model");
+const Brand_1 = require("../models/Brand");
 class CarsController {
 }
 _a = CarsController;
-//metodo de obtener todos
 CarsController.listCars = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const repoCars = data_source_1.AppDataSource.getRepository(Car_1.Car);
+    const color = req.query.color || "";
+    const brand = req.query.brand || "";
+    const model = req.query.model || "";
+    const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
     try {
-        const car = yield repoCars.find({
-            where: { state: true },
+        const car = yield repoCar.find({
+            where: {
+                state: true,
+                color: (0, typeorm_1.Like)(`%${color}%`),
+                brand: { type: (0, typeorm_1.Like)(`%${brand}%`) },
+                model: { typemodel: (0, typeorm_1.Like)(`%${model}%`) },
+            },
+            relations: { brand: true, model: true },
         });
         return car.length > 0
             ? res.json({
                 ok: true,
                 msg: "LIST OF CARS",
-                car
+                car,
             })
             : res.json({ ok: false, msg: "DATA NOT FOUND", car });
     }
     catch (error) {
         return res.json({
             ok: false,
-            msg: `ERROR ==> ${error}`,
+            message: `ERROR ==> ${error}`,
         });
     }
 });
+//metodo de obtener todos
+//  static listCars = async(req: Request, res: Response)=>{
+//    const color = req.query.color || ""
+//     const serialnumber = req.query.serialnumber || ""
+//         const repoCars = AppDataSource.getRepository(Car);
+//         try {
+//             const car = await repoCars.find({
+//                 where:{state:true,
+//                 color: Like(`%${color}%`),
+//                 serialnumber: Like(`%${serialnumber}%`)
+//                 },
+//             });
+//             return car.length>0
+//             ? res.json({
+//                 ok: true,
+//                 msg: "LIST OF CARS",
+//                 car
+//             })
+//             : res.json({ok:false, msg:"DATA NOT FOUND", car});
+//         } catch (error) {
+//             return res.json({
+//                 ok:false,
+//                 msg: `ERROR ==> ${error}`,
+//             });
+//         }
+//     }
 //crear carro
 CarsController.createCar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { owner, brand } = req.body;
+    const { brandId, modelId, color, serialnumber } = req.body;
     const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
+    const repoModel = data_source_1.AppDataSource.getRepository(Model_1.Model);
+    const repoBrand = data_source_1.AppDataSource.getRepository(Brand_1.Brand);
     try {
+        if (!modelId || !brandId) {
+            return res.json({
+                ok: false,
+                message: "modelId and brandId is required in the request body",
+            });
+        }
+        const exisitingModel = yield repoModel.findOne({
+            where: { id: modelId },
+        });
+        const existingBrand = yield repoBrand.findOne({ where: { id: brandId } });
+        if (!exisitingModel || !existingBrand) {
+            return res.json({
+                ok: false,
+                message: `Model and Brand ${modelId} ${brandId} does not exist`,
+            });
+        }
         const car = new Car_1.Car();
-        car.owner = owner;
-        car.brand = brand;
+        car.brand = brandId;
+        car.model = modelId;
+        car.color = color;
+        car.serialnumber = serialnumber;
         yield repoCar.save(car);
         return res.json({
             ok: true,
-            msg: "CAR WAS CREATE",
+            STATUS_CODES: 200,
+            message: "Car was created",
+            // brandType:existingBrand.type,
+            // modeltype:exisitingModel.typemodel
         });
     }
     catch (error) {
         return res.json({
             ok: false,
-            msg: `ERROR==> ${error}`
+            STATUS_CODES: 500,
+            message: `ERROR  ===> ${error}`,
         });
     }
 });
 // modificar carro
 CarsController.updateCar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id);
-    const { owner, brand } = req.body;
+    const { modelId, brandId, color, serialnumber } = req.body;
     const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
-    let cars;
+    let car;
     try {
-        cars = yield repoCar.findOne({
-            where: { id, state: true }
-        });
-        if (!cars) {
-            throw new Error("CAR DONT EXIST IN DATABASE");
+        car = yield repoCar.findOne({ where: { id, state: true } });
+        if (!car) {
+            throw new Error("Car dont exist in database");
         }
-        cars.owner = owner;
-        cars.brand = brand;
-        yield repoCar.save(cars);
+        if (modelId || brandId) {
+            car.model = modelId;
+            car.brand = brandId;
+        }
+        car.model = modelId;
+        car.brand = brandId;
+        car.color = color;
+        car.serialnumber = serialnumber;
+        yield repoCar.save(car);
         return res.json({
             ok: true,
-            msg: "CAR WAS UPDATE"
+            STATUS_CODE: 200,
+            message: `Car was update`,
         });
     }
     catch (error) {
         return res.json({
             ok: false,
-            msg: `ERROR==> ${error}`
+            STATUS_CODES: 500,
+            message: `ERROR ==> ${error}`,
         });
     }
 });
 // buscar carro por id
 CarsController.byIdCar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _b, _c;
     const id = parseInt(req.params.id);
     const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
     try {
         const car = yield repoCar.findOne({
             where: { id, state: true },
+            relations: ["brand", "model"],
         });
         return car
-            ? res.json({ ok: true, car, msg: "SUCCESS" })
-            : res.json({ ok: false, msg: "THE ID DONT EXIST" });
+            ? res.json({
+                ok: true,
+                car: {
+                    brand: (_b = car.brand) === null || _b === void 0 ? void 0 : _b.type,
+                    model: (_c = car.model) === null || _c === void 0 ? void 0 : _c.typemodel,
+                    color: car.color,
+                    serialnumber: car.serialnumber,
+                },
+                message: "SUCCES",
+            })
+            : res.json({
+                ok: false,
+                message: "the Id not exist",
+            });
     }
     catch (error) {
         return res.json({
             ok: false,
-            msg: `ERROR==> ${error}`,
+            message: `ERROR  ==> ${error}`,
         });
     }
 });
@@ -124,29 +204,7 @@ CarsController.deleteCar = (req, res) => __awaiter(void 0, void 0, void 0, funct
     catch (error) {
         return res.json({
             ok: false,
-            msg: `ERROR==> ${error}`
-        });
-    }
-});
-CarsController.listQuery = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { owner, brand } = req.query;
-    const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
-    try {
-        const car = yield repoCar.createQueryBuilder("car")
-            .where("car.owner = :owner OR car.brand = :brand ", { owner: owner, brand: brand, state: true })
-            .getOne();
-        return car
-            ? res.json({
-                ok: true,
-                msg: "OWNER OR BRAND IS",
-                car
-            })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", car });
-    }
-    catch (error) {
-        return res.json({
-            ok: false,
-            msg: `ERROR ==> ${error}`,
+            msg: `ERROR==> ${error}`,
         });
     }
 });

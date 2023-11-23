@@ -7,7 +7,7 @@ import { Brand } from "../models/Brand";
 
 class CarsController {
   static listCars = async (req: Request, res: Response) => {
-    const name = req.query.name || "";
+    const color = req.query.color || "";
     const brand = req.query.brand || "";
     const model = req.query.model || "";
 
@@ -16,7 +16,7 @@ class CarsController {
       const car = await repoCar.find({
         where: {
           state: true,
-          name: Like(`%${name}%`),
+          color: Like(`%${color}%`),
           brand: { type: Like(`%${brand}%`) },
           model: { typemodel: Like(`%${model}%`) },
         },
@@ -67,7 +67,7 @@ class CarsController {
 
   //crear carro
   static createCar = async (req: Request, res: Response) => {
-    const { brandId, modelId, name, serialnumber } = req.body;
+    const { brandId, modelId, color, serialnumber } = req.body;
     const repoCar = AppDataSource.getRepository(Car);
     const repoModel = AppDataSource.getRepository(Model);
     const repoBrand = AppDataSource.getRepository(Brand);
@@ -94,7 +94,7 @@ class CarsController {
       const car = new Car();
       car.brand = brandId;
       car.model = modelId;
-      car.name = name;
+      car.color = color;
       car.serialnumber = serialnumber;
       await repoCar.save(car);
       return res.json({
@@ -116,7 +116,7 @@ class CarsController {
   // modificar carro
   static updateCar = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const { modelId, brandId, name, serialnumber } = req.body;
+    const { modelId, brandId, color, serialnumber } = req.body;
     const repoCar = AppDataSource.getRepository(Car);
     let car: Car;
 
@@ -133,7 +133,7 @@ class CarsController {
 
       car.model = modelId;
       car.brand = brandId;
-      car.name = name;
+      car.color = color;
       car.serialnumber = serialnumber;
       await repoCar.save(car);
       return res.json({
@@ -165,7 +165,7 @@ class CarsController {
             car: {
               brand: car.brand?.type,
               model: car.model?.typemodel,
-              color: car.name,
+              color: car.color,
               serialnumber: car.serialnumber,
             },
             message: "SUCCES",

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import CarsController from "../controllers/car.controller";
+import { ValidateToken } from "../jwt/tokenvalido";
 const router = Router()
 const car = CarsController
 
-router.get('/', car.listCars)
-router.post('/', car.createCar)
-router.get('/:id', car.byIdCar)
-router.put('/:id', car.updateCar)
-router.delete('/:id', car.deleteCar)
+router.get('/', ValidateToken, car.listCars)
+router.post('/', ValidateToken,car.createCar)
+router.get('/:id',ValidateToken, car.byIdCar)
+router.put('/:id',ValidateToken, car.updateCar)
+router.delete('/:id',ValidateToken, car.deleteCar)
 
 export default router

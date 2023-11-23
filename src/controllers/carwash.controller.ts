@@ -33,55 +33,54 @@ class CarwashController {
   static createCarwash = async (req: Request, res: Response) => {
     const { clientId, type, price, amount, subtotal, total } = req.body;
     const repoClient = AppDataSource.getRepository(Client);
-    const repoService = AppDataSource.getRepository(CarWash);
-
+    const repoCarWash = AppDataSource.getRepository(CarWash);
     try {
-      const service = new CarWash();
-      service.client = clientId;
-      service.type = type;
-      service.price = price;
-      service.amount = amount;
-      service.subTotal = subtotal;
-      service.total = total;
+      const newUser = await repoClient.findOne({
+        where: {
+          id: clientId,
+        },
+      });
+      const carwash = new CarWash();
+      carwash.client = clientId;
+      carwash.type = type;
+      carwash.price = price;
+      carwash.amount = amount;
+      carwash.subTotal = subtotal;
+      carwash.total = total;
 
-      let subt = price * amount;
-      service.subTotal = subt;
-      service.total = parseFloat(service.subTotal.toFixed(2));
-      let disc1 = subtotal * 0.15;
-
-      const client_f = await repoClient.findOne({ where: { id: clientId } });
-
-      if (client_f.points >= 10 && client_f.points < 20) {
-        client_f.points = client_f.points + service.amount;
-        service.total = parseFloat(
-          (service.subTotal - service.subTotal * 0.1).toFixed(2)
+      let SubTotal = price * amount;
+      carwash.subTotal = SubTotal;
+      if (newUser.points >= 10) {
+        newUser.points = newUser.points + carwash.amount;
+        carwash.total = parseFloat(
+          (carwash.subTotal - carwash.subTotal * 0.1).toFixed(2)
         );
-        await repoService.save(service);
-        repoClient.save(client_f);
+        newUser.points = newUser.points - newUser.points;
+        await repoCarWash.save(carwash);
+        repoClient.save(newUser);
         return res.json({
           ok: true,
-          message: "points are 10 or more get a 15% discount rent was creaetd",
+          message: "POINTS ARE 10 THE DISCOUNT IS THE 10%",
         });
-      } else if (client_f.points > 20) {
-        client_f.points = client_f.points + service.amount;
-        service.total = service.subTotal - service.subTotal * 0.2;
-        await repoService.save(service);
-        repoClient.save(client_f);
+      } else if (newUser.points >= 20) {
+        newUser.points = newUser.points + carwash.amount;
+        carwash.total = carwash.subTotal - carwash.subTotal * 0.2;
+        newUser.points = newUser.points - newUser.points;
+        await repoCarWash.save(carwash);
+        repoClient.save(newUser);
         return res.json({
           ok: true,
-          message: "points are 20 or more get a 20% discount rent was creaetd",
+          message: "POINTS ARE 20 THE DISCOUNT IS THE 20%",
         });
-      } else {
-        client_f.points = client_f.points + service.amount;
-
-        await repoService.save(service);
-        repoClient.save(client_f);
-        return res.json({ ok: true, message: " rent was creaetd" });
       }
+      newUser.points = newUser.points - newUser.points;
+      await repoCarWash.save(carwash);
+      repoClient.save(carwash);
+      return res.json({ ok: true, message: "CARWASH WAS CREATE" });
     } catch (error) {
       return res.json({
         ok: false,
-        message: `error that movie does not exist = ${error.message}`,
+        message: `ERROR THAT CLIENT DONT EXIST = ${error.message}`,
       });
     }
   };
@@ -97,13 +96,7 @@ class CarwashController {
       if (!service) {
         throw new Error("SERVICE DONT NOT EXIST IN THE DATABASE");
       }
-      // const existingClient = await repoClient.findOne({ where: { id: clientId } });
-      // if (!existingClient) {
-      //   return res.json({
-      //     ok: false,
-      //     msg: `CLIENT WITH ID '${clientId}' DOESN'T EXIST`,
-      //   });
-      // }
+
       service.type = type;
       service.price = price;
       (await repoService.save(service))

@@ -18,7 +18,7 @@ import {
     @Column()
     name: string;
     @Column()
-    phone: number;
+    phone: string;
     @Column({ default: 0 })
     points: number;
     @Column({ default: true })

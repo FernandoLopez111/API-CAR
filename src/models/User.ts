@@ -12,6 +12,8 @@ export class User{
    @RelationId((user:User)=> user.rol)
    rolId: number
    @Column()
+   name: string
+   @Column()
    email: string
    @Column()
    password: string

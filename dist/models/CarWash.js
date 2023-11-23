@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CarWash = void 0;
 const typeorm_1 = require("typeorm");
-const Car_1 = require("./Car");
+const Client_1 = require("./Client");
 let CarWash = class CarWash {
 };
 exports.CarWash = CarWash;
@@ -20,21 +20,38 @@ __decorate([
     __metadata("design:type", Number)
 ], CarWash.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Car_1.Car),
-    __metadata("design:type", Car_1.Car)
-], CarWash.prototype, "car", void 0);
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], CarWash.prototype, "type", void 0);
 __decorate([
-    (0, typeorm_1.RelationId)((carwash) => carwash.car),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], CarWash.prototype, "carId", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], CarWash.prototype, "service", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
 ], CarWash.prototype, "price", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Client_1.Client),
+    __metadata("design:type", Client_1.Client)
+], CarWash.prototype, "client", void 0);
+__decorate([
+    (0, typeorm_1.RelationId)((carwash) => carwash.client),
+    __metadata("design:type", Number)
+], CarWash.prototype, "clientId", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], CarWash.prototype, "amount", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], CarWash.prototype, "date", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    __metadata("design:type", Number)
+], CarWash.prototype, "subTotal", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    __metadata("design:type", Number)
+], CarWash.prototype, "total", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)

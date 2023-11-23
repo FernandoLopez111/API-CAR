@@ -17,7 +17,7 @@ export class Car{
     @RelationId((car:Car)=>car.model)
     modelId : number
     @Column()
-    name: string
+    color: string
     @Column()
     serialnumber : number
     @Column({default:true})

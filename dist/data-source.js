@@ -6,7 +6,7 @@ exports.AppDataSource = new typeorm_1.DataSource({
     type: "mysql",
     host: "localhost",
     username: "root",
-    password: "200409",
+    password: "password",
     port: 3306,
     database: "carwash-api",
     synchronize: true,

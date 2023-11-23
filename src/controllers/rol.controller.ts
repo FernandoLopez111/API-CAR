@@ -33,7 +33,10 @@ class RoleController {
       const rol = new Rol();
       rol.type = type;
       await roleRepository.save(rol);
-      return res.json({});
+      return res.json({
+        ok: true,
+        msg: "ROL WAS CREATE",
+      });
     } catch (error) {
       return res.json({
         ok: false,
@@ -97,7 +100,7 @@ class RoleController {
       }
       deleterol.state = false;
       await reposRol.save(deleterol);
-      return res.json({ ok: true, msg: "Rol disabled" });
+      return res.json({ ok: true, msg: "ROL WAS DELETE" });
     } catch (error) {
       return res.json({
         ok: false,

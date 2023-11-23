@@ -11,21 +11,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Car = void 0;
 const typeorm_1 = require("typeorm");
+const Brand_1 = require("./Brand");
+const Model_1 = require("./Model");
 let Car = class Car {
 };
 exports.Car = Car;
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    (0, typeorm_1.PrimaryGeneratedColumn)("increment"),
     __metadata("design:type", Number)
 ], Car.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], Car.prototype, "owner", void 0);
+    (0, typeorm_1.ManyToOne)(() => Brand_1.Brand),
+    __metadata("design:type", Brand_1.Brand)
+], Car.prototype, "brand", void 0);
+__decorate([
+    (0, typeorm_1.RelationId)((car) => car.brand),
+    __metadata("design:type", Number)
+], Car.prototype, "brandId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Model_1.Model),
+    __metadata("design:type", Model_1.Model)
+], Car.prototype, "model", void 0);
+__decorate([
+    (0, typeorm_1.RelationId)((car) => car.model),
+    __metadata("design:type", Number)
+], Car.prototype, "modelId", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Car.prototype, "brand", void 0);
+], Car.prototype, "color", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Car.prototype, "serialnumber", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: true }),
     __metadata("design:type", Boolean)
