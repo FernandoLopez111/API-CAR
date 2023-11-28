@@ -15,12 +15,12 @@ class Server {
     middlewares() {
         this.app.use((0, cors_1.default)({
             origin: ["http://localhost:5173", "http://localhost:5174"],
-            credential: true
+            credential: true,
         }));
         this.app.use((0, morgan_1.default)("dev"));
         this.app.use(express_1.default.json({ limit: "50mb" }));
         this.app.use(express_1.default.urlencoded({ extended: true, limit: "50mb" }));
-        this.app.use('/', index_routes_1.default);
+        this.app.use("/", index_routes_1.default);
     }
     listen() {
         this.app.listen((this.port = process.env.PORT || Server.PORT), () => {

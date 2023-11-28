@@ -13,6 +13,6 @@ exports.AppDataSource = new typeorm_1.DataSource({
     logging: true,
     entities: ["dist/models/**/*.js"],
     subscribers: ["dist/subscribers/**/*.js"],
-    migrations: ["dist/migrations/**/*.js"]
+    migrations: ["dist/migrations/**/*.js"],
 });
 //# sourceMappingURL=data-source.js.map
