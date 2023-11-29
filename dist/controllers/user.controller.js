@@ -46,12 +46,16 @@ UserController.createUser = (req, res) => __awaiter(void 0, void 0, void 0, func
     const repoRol = data_source_1.AppDataSource.getRepository(Rol_1.Rol);
     let existingRol;
     try {
+        const userExist = yield userRepository.findOne({ where: { email } });
+        if (userExist) {
+            return res.json({ ok: false, message: `Email '${email}' already exists` });
+        }
         if (rolId) {
             existingRol = yield repoRol.findOne({ where: { id: rolId } });
             if (!existingRol) {
                 return res.json({
                     ok: false,
-                    msg: `ROL WITH ID '${rolId}' DONT EXIST`,
+                    msg: `ROL WITH ID '${rolId}' DON'T EXIST`,
                 });
             }
             const user = new User_1.User();

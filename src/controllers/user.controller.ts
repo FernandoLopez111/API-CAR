@@ -36,14 +36,20 @@ class UserController {
     let existingRol;
 
     try {
+      const userExist = await userRepository.findOne({where: {email}})
+      if(userExist){
+        return res.json({ok: false, message: `Email '${email}' already exists` })
+      }
+
       if (rolId) {
         existingRol = await repoRol.findOne({ where: { id: rolId } });
         if (!existingRol) {
           return res.json({
             ok: false,
-            msg: `ROL WITH ID '${rolId}' DONT EXIST`,
+            msg: `ROL WITH ID '${rolId}' DON'T EXIST`,
           });
         }
+
         const user = new User();
         user.name = name;
         user.email = email;
@@ -76,13 +82,13 @@ class UserController {
         where: { id, state: true },
       });
       if (!user) {
-        throw new Error("USER DONT EXIST IN THE DATABASE");
+        throw new Error("USER DON'T EXIST IN THE DATABASE");
       }
       const existingRol = await repoRol.findOne({ where: { id: rolId } });
       if (!existingRol) {
         return res.json({
           ok: false,
-          msg: `ROL WITH ID '${rolId}' DONT EXIST`,
+          msg: `ROL WITH ID '${rolId}' DON'T EXIST`,
         });
       }
       user.rol = rolId;
@@ -112,7 +118,7 @@ class UserController {
       });
       return user
         ? res.json({ ok: true, user, msg: "SUCCESSFULLY" })
-        : res.json({ ok: false, msg: "THE ID DONT EXIST" });
+        : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
     } catch (error) {
       return res.json({
         ok: false,
@@ -128,7 +134,7 @@ class UserController {
         where: { id, state: true },
       });
       if (!user) {
-        throw new Error("User dont exist in data base");
+        throw new Error("User don't exist in data base");
       }
       user.state = false;
       await userRepository.save(user);
