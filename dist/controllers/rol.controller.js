@@ -12,6 +12,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const data_source_1 = require("../data-source");
 const Rol_1 = require("../models/Rol");
+const typeorm_1 = require("typeorm");
 const roleRepository = data_source_1.AppDataSource.getRepository(Rol_1.Rol);
 class RoleController {
 }
@@ -19,15 +20,28 @@ _a = RoleController;
 //metodo de listar
 RoleController.listRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const repoRoles = data_source_1.AppDataSource.getRepository(Rol_1.Rol);
+    const name = req.query.name || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    console.log(req.query);
     try {
+        const skip = (page - 1) * limit;
         const rol = yield repoRoles.find({
-            where: { state: true },
+            where: {
+                state: true,
+                type: (0, typeorm_1.Like)(`%${name}`)
+            },
+            skip,
+            take: limit,
         });
         return rol.length > 0
             ? res.json({
                 ok: true,
                 msg: "LIST OF ROLES",
                 rol,
+                page,
+                limit,
+                totalRoles: rol.length
             })
             : res.json({ ok: false, msg: "DATA NOT FOUND", rol });
     }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Rol } from "../models/Rol";
+import { Like } from "typeorm";
 
 const roleRepository = AppDataSource.getRepository(Rol);
 
@@ -8,15 +9,28 @@ class RoleController {
   //metodo de listar
   static listRoles = async (req: Request, res: Response) => {
     const repoRoles = AppDataSource.getRepository(Rol);
+    const name = req.query.name || ""
+    const page = parseInt(req.query.page as string) || 1
+    const limit = parseInt(req.query.limit as string ) || 5
+
+    console.log(req.query)
     try {
+      const skip = (page - 1) * limit;
       const rol = await repoRoles.find({
-        where: { state: true },
+        where: { 
+          state: true ,
+          type: Like(`%${name}`)},
+          skip,
+          take: limit,
       });
       return rol.length > 0
         ? res.json({
             ok: true,
             msg: "LIST OF ROLES",
             rol,
+            page,
+            limit,
+            totalRoles: rol.length
           })
         : res.json({ ok: false, msg: "DATA NOT FOUND", rol });
     } catch (e) {
@@ -26,6 +40,7 @@ class RoleController {
       });
     }
   };
+  
   //metodo de crear
   static createRol = async (req: Request, res: Response) => {
     const { type } = req.body;
@@ -44,6 +59,7 @@ class RoleController {
       });
     }
   };
+
   static modifyRol = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const { type } = req.body;
@@ -86,6 +102,7 @@ class RoleController {
       });
     }
   };
+
   // DELETE ROL
   static deleteRol = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);

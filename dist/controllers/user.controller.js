@@ -14,6 +14,7 @@ const data_source_1 = require("../data-source");
 const Rol_1 = require("../models/Rol");
 const User_1 = require("../models/User");
 const typeorm_1 = require("typeorm");
+const typeorm_2 = require("typeorm");
 class UserController {
 }
 _a = UserController;
@@ -58,19 +59,27 @@ UserController.createUser = (req, res) => __awaiter(void 0, void 0, void 0, func
                     msg: `ROL WITH ID '${rolId}' DON'T EXIST`,
                 });
             }
-            const user = new User_1.User();
-            user.name = name;
-            user.email = email;
-            user.password = password;
-            user.rol = rolId;
-            user.hashPassword();
-            yield userRepository.save(user);
-            return res.json({
-                ok: true,
-                msg: "Users was create",
-                user,
-            });
         }
+        else {
+            if ((existingRol === null || existingRol === void 0 ? void 0 : existingRol.rol) && rolId) {
+                return res.json({
+                    ok: false,
+                    msg: 'Cannot assign rol to a regular user'
+                });
+            }
+        }
+        const user = new User_1.User();
+        user.name = name;
+        user.email = email;
+        user.password = password;
+        user.rol = existingRol;
+        user.hashPassword();
+        yield userRepository.save(user);
+        return res.json({
+            ok: true,
+            msg: "Users was create",
+            user,
+        });
     }
     catch (error) {
         return res.json({
@@ -84,21 +93,31 @@ UserController.updateUser = (req, res) => __awaiter(void 0, void 0, void 0, func
     const userRepository = data_source_1.AppDataSource.getRepository(User_1.User);
     const repoRol = data_source_1.AppDataSource.getRepository(Rol_1.Rol);
     const { rolId, name, email, password } = req.body;
+    let user;
     try {
-        const user = yield userRepository.findOneOrFail({
+        user = yield userRepository.findOneOrFail({
             where: { id, state: true },
         });
         if (!user) {
-            throw new Error("USER DONT EXIST IN THE DATABASE");
+            throw new Error("USER DON'T EXIST IN THE DATABASE");
+        }
+        const existingUser = yield userRepository.findOne({
+            where: { email, id: (0, typeorm_2.Not)(id) },
+        });
+        if (existingUser) {
+            return res.json({
+                ok: false,
+                msg: `Email with ID '${email}' already exist`,
+            });
         }
         const existingRol = yield repoRol.findOne({ where: { id: rolId } });
         if (!existingRol) {
             return res.json({
                 ok: false,
-                msg: `ROL WITH ID '${rolId}' DONT EXIST`,
+                msg: `ROL WITH ID '${rolId}' DON'T EXIST`,
             });
         }
-        user.rol = rolId;
+        user.rol = existingRol;
         user.name = name;
         user.email = email;
         user.password = password;
@@ -125,7 +144,7 @@ UserController.byIdUser = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
         return user
             ? res.json({ ok: true, user, msg: "SUCCESSFULLY" })
-            : res.json({ ok: false, msg: "THE ID DONT EXIST" });
+            : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
     }
     catch (error) {
         return res.json({
@@ -142,7 +161,7 @@ UserController.deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, func
             where: { id, state: true },
         });
         if (!user) {
-            throw new Error("User dont exist in data base");
+            throw new Error("User don't exist in data base");
         }
         user.state = false;
         yield userRepository.save(user);
