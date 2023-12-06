@@ -19,7 +19,7 @@ export class Car{
     @Column()
     color: string
     @Column()
-    serialnumber : number
+    serialnumber : string
     @Column({default:true})
     state: boolean
    
