@@ -7,22 +7,30 @@ import { Like } from "typeorm";
 class CarwashController {
   static listCarwash = async (req: Request, res: Response) => {
     const type = req.query.type || "";
-    const repoClient = AppDataSource.getRepository(CarWash);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const repoCarwash = AppDataSource.getRepository(CarWash);
 
     try {
-      const service = await repoClient.find({
+      const skip = (page - 1) * limit;
+      const carwash = await repoCarwash.find({
         where: {
           state: true,
           type: Like(`%${type}%`),
         },
+        skip, take: limit ,
+        relations:{client:true}
       });
-      return service.length > 0
+      return carwash.length > 0
         ? res.json({
             ok: true,
             msg: "LIST OF SERVICES",
-            service,
+            carwash,
+            page,
+            limit,
+            totalClients: carwash.length
           })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", service });
+        : res.json({ ok: false, msg: "DATA NOT FOUND", carwash });
     } catch (error) {
       return res.json({
         ok: false,
@@ -86,21 +94,21 @@ class CarwashController {
   };
   static updateService = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const repoService = AppDataSource.getRepository(CarWash);
+    const repoCarWash = AppDataSource.getRepository(CarWash);
     const { type, price } = req.body;
 
     try {
-      const service = await repoService.findOne({
+      const carwash = await repoCarWash.findOne({
         where: { id, state: true },
       });
-      if (!service) {
+      if (!carwash) {
         throw new Error("SERVICE DONT NOT EXIST IN THE DATABASE");
       }
 
-      service.type = type;
-      service.price = price;
-      (await repoService.save(service))
-        ? res.json({ ok: true, service, msg: "SERVICE WAS UPDATED" })
+      carwash.type = type;
+      carwash.price = price;
+      (await repoCarWash.save(carwash))
+        ? res.json({ ok: true, carwash, msg: "SERVICE WAS UPDATED" })
         : res.json({ ok: false, msg: "THE ID DONT EXIST" });
     } catch (error) {
       return res.json({
@@ -111,14 +119,14 @@ class CarwashController {
   };
   static byIdService = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const repoService = AppDataSource.getRepository(CarWash);
+    const repoCarWash = AppDataSource.getRepository(CarWash);
 
     try {
-      const service = await repoService.findOne({
+      const carwash = await repoCarWash.findOne({
         where: { id, state: true },
       });
-      return service
-        ? res.json({ ok: true, service, msg: "SUCCESSFULLY" })
+      return carwash
+        ? res.json({ ok: true, carwash, msg: "SUCCESSFULLY" })
         : res.json({ ok: false, msg: "THE ID DOESN'T EXIST" });
     } catch (error) {
       return res.json({
@@ -129,16 +137,16 @@ class CarwashController {
   };
   static deleteService = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const repoService = AppDataSource.getRepository(CarWash);
+    const repoCarWash = AppDataSource.getRepository(CarWash);
     try {
-      const service = await repoService.findOne({
+      const carwash = await repoCarWash.findOne({
         where: { id, state: true },
       });
-      if (!service) {
+      if (!carwash) {
         throw new Error("SERVICE DONT EXIST IN THE DATABSE");
       }
-      service.state = false;
-      await repoService.save(service);
+      carwash.state = false;
+      await repoCarWash.save(carwash);
       return res.json({ ok: true, msg: "SERVICE WAS DELETE" });
     } catch (error) {
       return res.json({

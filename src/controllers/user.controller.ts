@@ -8,11 +8,15 @@ import { Not } from 'typeorm';
 class UserController {
   static listUser = async (req: Request, res: Response) => {
     const rol = req.query.rol || "";
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
     const userRepository = AppDataSource.getRepository(User);
     try {
+      const skip = (page - 1) * limit;
       const user = await userRepository.find({
         where: { state: true, rol: { type: Like(`%${rol}%`) } },
         relations: { rol: true },
+        skip, take: limit ,
       });
 
       return user.length > 0
@@ -20,6 +24,9 @@ class UserController {
             ok: true,
             msg: "LIST OF USERS",
             user,
+            page,
+            limit,
+            totalClients: user.length
           })
         : res.json({ ok: false, msg: "DATA NOT FOUND", user });
     } catch (error) {

@@ -8,21 +8,29 @@ class ClientsController {
   static listClient = async (req: Request, res: Response) => {
     const name = req.query.name || "";
     const car = req.query.car || "";
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
     const repoCar = AppDataSource.getRepository(Client);
     try {
+      const skip = (page - 1) * limit;
       const client = await repoCar.find({
         where: {
           state: true,
           name: Like(`%${name}%`),
           car: { color: Like(`%${car}%`) },
         },
+        skip, take: limit ,
         relations: { car: true },
+        
       });
       return client.length > 0
         ? res.json({
             ok: true,
             msg: "LIST OF CLIENTS",
             client,
+            page,
+            limit,
+            totalClients: client.length
           })
         : res.json({ ok: false, msg: "DATA NOT FOUND", client });
     } catch (error) {

@@ -1,20 +1,29 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Model } from "../models/Model";
+import { Like } from "typeorm";
 
 class ModelController {
   //metodo de obtener todos
   static listModel = async (req: Request, res: Response) => {
+    const name = req.query.name || "";
     const repoModel = AppDataSource.getRepository(Model);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
     try {
+      const skip = (page - 1) * limit;
       const model = await repoModel.find({
-        where: { state: true },
+        where: { state: true, typemodel:Like(`${name}`) },
+        skip, take: limit ,
       });
       return model.length > 0
         ? res.json({
             ok: true,
             message: "LIST OF MODELS",
             model,
+            page,
+            limit,
+            totalModels: model.length
           })
         : res.json({
             ok: false,
