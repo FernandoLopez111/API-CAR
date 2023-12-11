@@ -1,19 +1,28 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Brand } from "../models/Brand";
+import { Like } from "typeorm";
 
 class BrandController {
   static listBrand = async (req: Request, res: Response) => {
     const repoBrand = AppDataSource.getRepository(Brand);
+    const name = req.query.name || "";
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
     try {
+      const skip = (page - 1) * limit;
       const brand = await repoBrand.find({
-        where: { state: true },
+        where: { state: true, type: Like(`${name}`),},
+         skip, take: limit ,
       });
       return brand.length > 0
         ? res.json({
             ok: true,
             msg: "LIST OF BRANDS",
             brand,
+            page,
+            limit,
+            totalBrands: brand.length
           })
         : res.json({ ok: false, msg: "DATA NOT FOUND", brand });
     } catch (error) {
