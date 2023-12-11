@@ -95,7 +95,7 @@ UserController.updateUser = (req, res) => __awaiter(void 0, void 0, void 0, func
     const { rolId, name, email, password } = req.body;
     let user;
     try {
-        user = yield userRepository.findOneOrFail({
+        user = yield userRepository.findOne({
             where: { id, state: true },
         });
         if (!user) {

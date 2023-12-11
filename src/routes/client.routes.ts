@@ -7,7 +7,7 @@ const client = ClientsController;
 
 router.get("/",ValidateToken, client.listClient);
 router.get("/car/:id",ValidateToken, client.getCar);
-router.post("/",ValidateToken, client.createClient);
+router.post("/", client.createClient);
 router.get("/:id",ValidateToken, client.byIdClient);
 router.put("/:id",ValidateToken, client.updateClient);
 router.delete("/:id",ValidateToken, client.deleteClient);

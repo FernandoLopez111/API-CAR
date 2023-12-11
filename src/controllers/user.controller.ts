@@ -89,7 +89,7 @@ class UserController {
     let user: User
 
     try {
-      user = await userRepository.findOneOrFail({
+      user = await userRepository.findOne({
         where: { id, state: true },
       });
 

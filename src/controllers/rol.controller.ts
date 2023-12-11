@@ -11,7 +11,7 @@ class RoleController {
     const repoRoles = AppDataSource.getRepository(Rol);
     const name = req.query.name || ""
     const page = parseInt(req.query.page as string) || 1
-    const limit = parseInt(req.query.limit as string ) || 5
+    const limit = parseInt(req.query.limit as string ) || 10
 
     console.log(req.query)
     try {

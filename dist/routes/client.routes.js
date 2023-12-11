@@ -10,7 +10,7 @@ const router = (0, express_1.Router)();
 const client = client_controller_1.default;
 router.get("/", tokenvalido_1.ValidateToken, client.listClient);
 router.get("/car/:id", tokenvalido_1.ValidateToken, client.getCar);
-router.post("/", tokenvalido_1.ValidateToken, client.createClient);
+router.post("/", client.createClient);
 router.get("/:id", tokenvalido_1.ValidateToken, client.byIdClient);
 router.put("/:id", tokenvalido_1.ValidateToken, client.updateClient);
 router.delete("/:id", tokenvalido_1.ValidateToken, client.deleteClient);

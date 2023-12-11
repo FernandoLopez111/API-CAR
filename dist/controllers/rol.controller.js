@@ -22,7 +22,7 @@ RoleController.listRoles = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const repoRoles = data_source_1.AppDataSource.getRepository(Rol_1.Rol);
     const name = req.query.name || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 10;
     console.log(req.query);
     try {
         const skip = (page - 1) * limit;
