@@ -20,14 +20,18 @@ _a = ClientsController;
 ClientsController.listClient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const name = req.query.name || "";
     const car = req.query.car || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const repoCar = data_source_1.AppDataSource.getRepository(Client_1.Client);
     try {
+        const skip = (page - 1) * limit;
         const client = yield repoCar.find({
             where: {
                 state: true,
                 name: (0, typeorm_1.Like)(`%${name}%`),
                 car: { color: (0, typeorm_1.Like)(`%${car}%`) },
             },
+            skip, take: limit,
             relations: { car: true },
         });
         return client.length > 0
@@ -35,6 +39,9 @@ ClientsController.listClient = (req, res) => __awaiter(void 0, void 0, void 0, f
                 ok: true,
                 msg: "LIST OF CLIENTS",
                 client,
+                page,
+                limit,
+                totalClients: client.length
             })
             : res.json({ ok: false, msg: "DATA NOT FOUND", client });
     }

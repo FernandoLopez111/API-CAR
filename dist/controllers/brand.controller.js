@@ -12,20 +12,29 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const data_source_1 = require("../data-source");
 const Brand_1 = require("../models/Brand");
+const typeorm_1 = require("typeorm");
 class BrandController {
 }
 _a = BrandController;
 BrandController.listBrand = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const repoBrand = data_source_1.AppDataSource.getRepository(Brand_1.Brand);
+    const name = req.query.name || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     try {
+        const skip = (page - 1) * limit;
         const brand = yield repoBrand.find({
-            where: { state: true },
+            where: { state: true, type: (0, typeorm_1.Like)(`${name}`), },
+            skip, take: limit,
         });
         return brand.length > 0
             ? res.json({
                 ok: true,
                 msg: "LIST OF BRANDS",
                 brand,
+                page,
+                limit,
+                totalBrands: brand.length
             })
             : res.json({ ok: false, msg: "DATA NOT FOUND", brand });
     }

@@ -20,17 +20,24 @@ class UserController {
 _a = UserController;
 UserController.listUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const rol = req.query.rol || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const userRepository = data_source_1.AppDataSource.getRepository(User_1.User);
     try {
+        const skip = (page - 1) * limit;
         const user = yield userRepository.find({
             where: { state: true, rol: { type: (0, typeorm_1.Like)(`%${rol}%`) } },
             relations: { rol: true },
+            skip, take: limit,
         });
         return user.length > 0
             ? res.json({
                 ok: true,
                 msg: "LIST OF USERS",
                 user,
+                page,
+                limit,
+                totalClients: user.length
             })
             : res.json({ ok: false, msg: "DATA NOT FOUND", user });
     }

@@ -19,21 +19,29 @@ class CarwashController {
 _a = CarwashController;
 CarwashController.listCarwash = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const type = req.query.type || "";
-    const repoClient = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const repoCarwash = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
     try {
-        const service = yield repoClient.find({
+        const skip = (page - 1) * limit;
+        const carwash = yield repoCarwash.find({
             where: {
                 state: true,
                 type: (0, typeorm_1.Like)(`%${type}%`),
             },
+            skip, take: limit,
+            relations: { client: true }
         });
-        return service.length > 0
+        return carwash.length > 0
             ? res.json({
                 ok: true,
                 msg: "LIST OF SERVICES",
-                service,
+                carwash,
+                page,
+                limit,
+                totalClients: carwash.length
             })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", service });
+            : res.json({ ok: false, msg: "DATA NOT FOUND", carwash });
     }
     catch (error) {
         return res.json({
@@ -97,19 +105,19 @@ CarwashController.createCarwash = (req, res) => __awaiter(void 0, void 0, void 0
 });
 CarwashController.updateService = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id);
-    const repoService = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
+    const repoCarWash = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
     const { type, price } = req.body;
     try {
-        const service = yield repoService.findOne({
+        const carwash = yield repoCarWash.findOne({
             where: { id, state: true },
         });
-        if (!service) {
+        if (!carwash) {
             throw new Error("SERVICE DONT NOT EXIST IN THE DATABASE");
         }
-        service.type = type;
-        service.price = price;
-        (yield repoService.save(service))
-            ? res.json({ ok: true, service, msg: "SERVICE WAS UPDATED" })
+        carwash.type = type;
+        carwash.price = price;
+        (yield repoCarWash.save(carwash))
+            ? res.json({ ok: true, carwash, msg: "SERVICE WAS UPDATED" })
             : res.json({ ok: false, msg: "THE ID DONT EXIST" });
     }
     catch (error) {
@@ -121,13 +129,13 @@ CarwashController.updateService = (req, res) => __awaiter(void 0, void 0, void 0
 });
 CarwashController.byIdService = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id);
-    const repoService = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
+    const repoCarWash = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
     try {
-        const service = yield repoService.findOne({
+        const carwash = yield repoCarWash.findOne({
             where: { id, state: true },
         });
-        return service
-            ? res.json({ ok: true, service, msg: "SUCCESSFULLY" })
+        return carwash
+            ? res.json({ ok: true, carwash, msg: "SUCCESSFULLY" })
             : res.json({ ok: false, msg: "THE ID DOESN'T EXIST" });
     }
     catch (error) {
@@ -139,16 +147,16 @@ CarwashController.byIdService = (req, res) => __awaiter(void 0, void 0, void 0, 
 });
 CarwashController.deleteService = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = parseInt(req.params.id);
-    const repoService = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
+    const repoCarWash = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
     try {
-        const service = yield repoService.findOne({
+        const carwash = yield repoCarWash.findOne({
             where: { id, state: true },
         });
-        if (!service) {
+        if (!carwash) {
             throw new Error("SERVICE DONT EXIST IN THE DATABSE");
         }
-        service.state = false;
-        yield repoService.save(service);
+        carwash.state = false;
+        yield repoCarWash.save(carwash);
         return res.json({ ok: true, msg: "SERVICE WAS DELETE" });
     }
     catch (error) {

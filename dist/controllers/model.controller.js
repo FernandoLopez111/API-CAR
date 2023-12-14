@@ -12,21 +12,30 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const data_source_1 = require("../data-source");
 const Model_1 = require("../models/Model");
+const typeorm_1 = require("typeorm");
 class ModelController {
 }
 _a = ModelController;
 //metodo de obtener todos
 ModelController.listModel = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const name = req.query.name || "";
     const repoModel = data_source_1.AppDataSource.getRepository(Model_1.Model);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     try {
+        const skip = (page - 1) * limit;
         const model = yield repoModel.find({
-            where: { state: true },
+            where: { state: true, typemodel: (0, typeorm_1.Like)(`${name}`) },
+            skip, take: limit,
         });
         return model.length > 0
             ? res.json({
                 ok: true,
                 message: "LIST OF MODELS",
                 model,
+                page,
+                limit,
+                totalModels: model.length
             })
             : res.json({
                 ok: false,
