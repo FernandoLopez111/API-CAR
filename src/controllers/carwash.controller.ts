@@ -28,7 +28,7 @@ class CarwashController {
             carwash,
             page,
             limit,
-            totalClients: carwash.length
+            totalCarWash: carwash.length
           })
         : res.json({ ok: false, msg: "DATA NOT FOUND", carwash });
     } catch (error) {
@@ -39,75 +39,112 @@ class CarwashController {
     }
   };
   static createCarwash = async (req: Request, res: Response) => {
-    const { clientId, type, price, amount, subtotal, total } = req.body;
+    const { clientId, type, price, amount } = req.body;
     const repoClient = AppDataSource.getRepository(Client);
     const repoCarWash = AppDataSource.getRepository(CarWash);
     try {
       const newUser = await repoClient.findOne({
-        where: {
-          id: clientId,
-        },
+        where: { id: clientId },
       });
+
+      if (!newUser) {
+        return res.json({
+          ok: false,
+          message: "Client not found",
+        });
+      }
+
       const carwash = new CarWash();
-      carwash.client = clientId;
       carwash.type = type;
       carwash.price = price;
       carwash.amount = amount;
-      carwash.subTotal = subtotal;
-      carwash.total = total;
+      carwash.client = clientId;
+      carwash.subTotal = price * amount;
+      console.log(carwash);
 
-      let SubTotal = price * amount;
-      carwash.subTotal = SubTotal;
-      if (newUser.points >= 10) {
-        newUser.points = newUser.points + carwash.amount;
-        carwash.total = parseFloat(
-          (carwash.subTotal - carwash.subTotal * 0.1).toFixed(2)
-        );
-        newUser.points = newUser.points - newUser.points;
-        await repoCarWash.save(carwash);
-        repoClient.save(newUser);
-        return res.json({
-          ok: true,
-          message: "POINTS ARE 10 THE DISCOUNT IS THE 10%",
-        });
-      } else if (newUser.points >= 20) {
-        newUser.points = newUser.points + carwash.amount;
-        carwash.total = carwash.subTotal - carwash.subTotal * 0.2;
-        newUser.points = newUser.points - newUser.points;
-        await repoCarWash.save(carwash);
-        repoClient.save(newUser);
-        return res.json({
-          ok: true,
-          message: "POINTS ARE 20 THE DISCOUNT IS THE 20%",
-        });
+      let discount = 0.1;
+      if (newUser.points >= 20) {
+        discount = 0.2;
       }
-      newUser.points = newUser.points - newUser.points;
+      carwash.subTotal = price * amount;
+      carwash.total = carwash.subTotal - carwash.subTotal * discount;
+      newUser.points += amount;
+
+      newUser.points -= 20;
+
+      if (newUser.points < 0) {
+        newUser.points = 0;
+      } else {
+        carwash.subTotal = price * amount;
+        carwash.total = carwash.subTotal;
+      }
+
+      newUser.points += amount;
+
       await repoCarWash.save(carwash);
-      repoClient.save(carwash);
-      return res.json({ ok: true, message: "CARWASH WAS CREATE" });
+      await repoClient.save(newUser);
+
+      return res.json({
+        ok: true,
+        message: "CARWASH CREATE",
+        carwash,
+      });
     } catch (error) {
       return res.json({
         ok: false,
-        message: `ERROR THAT CLIENT DONT EXIST = ${error.message}`,
+        message: `ERROR= ${error.message}`,
       });
     }
   };
   static updateService = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
-    const repoCarWash = AppDataSource.getRepository(CarWash);
-    const { type, price } = req.body;
-
+    const repoService = AppDataSource.getRepository(CarWash);
+    const repoClient = AppDataSource.getRepository(Client);
+    const { type, price, amount, clientId } = req.body;
     try {
-      const carwash = await repoCarWash.findOne({
+      const carwash = await repoService.findOne({
         where: { id, state: true },
       });
+
       if (!carwash) {
         throw new Error("SERVICE DONT NOT EXIST IN THE DATABASE");
+      }
+      const newUser = await repoClient.findOne({
+        where: { id: clientId },
+      });
+      if (!newUser) {
+        return res.json({
+          ok: false,
+          msg: `CLIENT WITH ID '${clientId}' DOESN'T EXIST`,
+        });
       }
 
       carwash.type = type;
       carwash.price = price;
-      (await repoCarWash.save(carwash))
+      carwash.amount = amount;
+      carwash.client = clientId;
+
+      let discount = 0.1;
+      if (newUser.points >= 20) {
+        discount = 0.2;
+      }
+      carwash.subTotal = price * amount;
+      carwash.total = carwash.subTotal - carwash.subTotal * discount;
+      newUser.points += amount;
+
+      newUser.points -= 20;
+
+      if (newUser.points < 0) {
+        newUser.points = 0;
+      } else {
+        carwash.subTotal = price * amount;
+        carwash.total = carwash.subTotal;
+      }
+
+      newUser.points += amount;
+
+      console.log(carwash);
+      await repoService.save(carwash)
         ? res.json({ ok: true, carwash, msg: "SERVICE WAS UPDATED" })
         : res.json({ ok: false, msg: "THE ID DONT EXIST" });
     } catch (error) {

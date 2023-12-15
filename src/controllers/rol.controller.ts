@@ -13,7 +13,6 @@ class RoleController {
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string ) || 10
 
-    console.log(req.query)
     try {
       const skip = (page - 1) * limit;
       const rol = await repoRoles.find({
