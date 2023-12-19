@@ -8,13 +8,21 @@ import { Not } from 'typeorm';
 class UserController {
   static listUser = async (req: Request, res: Response) => {
     const rol = req.query.rol || "";
+    const name = req.query.name || "";
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || 30;
     const userRepository = AppDataSource.getRepository(User);
+
     try {
       const skip = (page - 1) * limit;
       const user = await userRepository.find({
-        where: { state: true, rol: { type: Like(`%${rol}%`) } },
+        where: { 
+          state: true, 
+          name: Like(`%${name}`),
+          rol: { 
+            type: Like(`%${rol}%`) 
+          } 
+        },
         relations: { rol: true },
         skip, take: limit ,
       });

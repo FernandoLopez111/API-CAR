@@ -6,24 +6,30 @@ import bcrypt from 'bcrypt'
 
 export class User{
     @PrimaryGeneratedColumn("increment")
-   id: number
-   @ManyToOne(()=>Rol)
-   rol: Rol
-   @RelationId((user:User)=> user.rol)
-   rolId: number
-   @Column()
-   name: string
-   @Column()
-   email: string
-   @Column()
-   password: string
-   @Column({default:true})
-   state: boolean
+    id: number
 
-   hashPassword(): void {
-   const salt = bcrypt.genSaltSync(10)
-    this.password = bcrypt.hashSync(this.password, salt)
- }
+    @ManyToOne(()=>Rol)
+    rol: Rol
+
+    @RelationId((user:User)=> user.rol)
+    rolId: number
+
+    @Column()
+    name: string
+
+    @Column()
+    email: string
+
+    @Column()
+    password: string
+    
+    @Column({default:true})
+    state: boolean
+
+    hashPassword(): void {
+    const salt = bcrypt.genSaltSync(10)
+        this.password = bcrypt.hashSync(this.password, salt)
+    }
    
 
 }
