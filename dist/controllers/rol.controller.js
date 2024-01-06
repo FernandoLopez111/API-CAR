@@ -20,29 +20,30 @@ _a = RoleController;
 //metodo de listar
 RoleController.listRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const repoRoles = data_source_1.AppDataSource.getRepository(Rol_1.Rol);
-    const type = req.query.type || "";
+    const name = req.query.name || "";
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    console.log(req.query);
     try {
         const skip = (page - 1) * limit;
-        const rol = yield repoRoles.find({
+        const roles = yield repoRoles.find({
             where: {
                 state: true,
-                type: (0, typeorm_1.Like)(`%${type}`)
+                type: (0, typeorm_1.Like)(`%${name}%`)
             },
             skip,
             take: limit,
         });
-        return rol.length > 0
+        return roles.length > 0
             ? res.json({
                 ok: true,
                 msg: "LIST OF ROLES",
-                rol,
+                roles,
                 page,
                 limit,
-                totalRoles: rol.length
+                totalRoles: roles.length
             })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", rol });
+            : res.json({ ok: false, msg: "DATA NOT FOUND", roles });
     }
     catch (e) {
         return res.json({

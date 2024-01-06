@@ -10,6 +10,7 @@ class CarsController {
     const color = req.query.color || "";
     const brand = req.query.brand || "";
     const model = req.query.model || "";
+    const serialNumber = req.query.serialNumber || "";
 
     const repoCar = AppDataSource.getRepository(Car);
     try {
@@ -17,8 +18,9 @@ class CarsController {
         where: {
           state: true,
           color: Like(`%${color}%`),
-          brand: { type: Like(`%${brand}%`) },
-          model: { typemodel: Like(`%${model}%`) },
+          brand: Like(`%${brand}%`) ,
+          model: Like(`%${model}%`) ,
+          serialnumber: Like(`%${serialNumber}%`)
         },
         relations: { brand: true, model: true },
       });

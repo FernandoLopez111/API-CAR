@@ -22,14 +22,16 @@ CarsController.listCars = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const color = req.query.color || "";
     const brand = req.query.brand || "";
     const model = req.query.model || "";
+    const serialNumber = req.query.serialNumber || "";
     const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
     try {
         const car = yield repoCar.find({
             where: {
                 state: true,
                 color: (0, typeorm_1.Like)(`%${color}%`),
-                brand: { type: (0, typeorm_1.Like)(`%${brand}%`) },
-                model: { typemodel: (0, typeorm_1.Like)(`%${model}%`) },
+                brand: (0, typeorm_1.Like)(`%${brand}%`),
+                model: (0, typeorm_1.Like)(`%${model}%`),
+                serialnumber: (0, typeorm_1.Like)(`%${serialNumber}%`)
             },
             relations: { brand: true, model: true },
         });

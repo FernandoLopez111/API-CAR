@@ -9,22 +9,24 @@ class BrandController {
     const name = req.query.name || "";
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+
+    console.log(req.query)
     try {
       const skip = (page - 1) * limit;
-      const brand = await repoBrand.find({
-        where: { state: true, type: Like(`${name}`),},
+      const brands = await repoBrand.find({
+        where: { state: true, type: Like(`%${name}%`),},
          skip, take: limit ,
       });
-      return brand.length > 0
+      return brands.length > 0
         ? res.json({
             ok: true,
             msg: "LIST OF BRANDS",
-            brand,
+            brands,
             page,
             limit,
-            totalBrands: brand.length
+            totalBrands: brands.length
           })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", brand });
+        : res.json({ ok: false, msg: "DATA NOT FOUND", brands });
     } catch (error) {
       return res.json({
         ok: false,

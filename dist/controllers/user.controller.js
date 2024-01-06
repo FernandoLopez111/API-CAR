@@ -29,7 +29,7 @@ UserController.listUser = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const user = yield userRepository.find({
             where: {
                 state: true,
-                name: (0, typeorm_1.Like)(`%${name}`),
+                name: (0, typeorm_1.Like)(`%${name}%`),
                 rol: {
                     type: (0, typeorm_1.Like)(`%${rol}%`)
                 }

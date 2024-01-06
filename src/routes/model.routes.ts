@@ -6,7 +6,7 @@ import { ValidateToken } from '../jwt/tokenvalido'
 const router = Router()
 const model = ModelController
 
-router.get('/',ValidateToken, model.listModel)
+router.get('/', ValidateToken, model.listModel)
 router.post('/',ValidateToken, model.createModel)
 router.get('/:id',ValidateToken, model.byIdModel)
 router.put('/:id',ValidateToken, model.updateModel)

@@ -3,7 +3,6 @@ import {Rol} from './Rol'
 import bcrypt from 'bcrypt'
 
 @Entity()
-
 export class User{
     @PrimaryGeneratedColumn("increment")
     id: number

@@ -7,7 +7,8 @@ import { Like } from "typeorm";
 class ClientsController {
   static listClient = async (req: Request, res: Response) => {
     const name = req.query.name || "";
-    const car = req.query.car || "";
+    const serialNumber = req.query.serialNumber || "";
+    const phone = req.query.phone || "";
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const repoCar = AppDataSource.getRepository(Client);
@@ -17,7 +18,8 @@ class ClientsController {
         where: {
           state: true,
           name: Like(`%${name}%`),
-          car: { color: Like(`%${car}%`) },
+          car: { color: Like(`%${serialNumber}%`) },
+          phone: Like(`%${phone}%`)
         },
         skip, take: limit ,
         relations: { car: true },
@@ -52,7 +54,7 @@ class ClientsController {
         if (!existingCar) {
           return res.json({
             ok: false,
-            msg: `CAR WITH ID '${carId}' DONT NOT EXIST`,
+            msg: `CAR WITH ID '${carId}' DON'T NOT EXIST`,
           });
         }
         const client = new Client();
@@ -80,15 +82,20 @@ class ClientsController {
     const repoCar = AppDataSource.getRepository(Car);
     const { carId, name, phone } = req.body;
 
+    let client: Client
     try {
-      const client = await repoClient.findOne({
+      client = await repoClient.findOne({
         where: { id, state: true },
       });
+
       if (!client) {
-        throw new Error("CLIENT DONT NOT EXIST IN THE DATABASE");
+        throw new Error("CLIENT DON'T NOT EXIST IN THE DATABASE");
       }
-      const existingRol = await repoCar.findOne({ where: { id: carId } });
-      if (!existingRol) {
+      const existingCar = await repoCar.findOne({ 
+        where: { id: carId } 
+      });
+
+      if (!existingCar) {
         return res.json({
           ok: false,
           msg: `CAR WITH ID '${carId}' DOESN'T EXIST`,
@@ -98,8 +105,9 @@ class ClientsController {
       client.name = name;
       client.phone = phone;
       (await repoClient.save(client))
-        ? res.json({ ok: true, client, msg: "CLIENT WAS UPDATED" })
-        : res.json({ ok: false, msg: "THE ID DONT EXIST" });
+        ? res.json({ ok: true, 
+          client, msg: "CLIENT WAS UPDATED" })
+        : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
     } catch (error) {
       return res.json({
         ok: false,

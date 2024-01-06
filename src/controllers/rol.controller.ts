@@ -9,29 +9,30 @@ class RoleController {
   //metodo de listar
   static listRoles = async (req: Request, res: Response) => {
     const repoRoles = AppDataSource.getRepository(Rol);
-    const type = req.query.type || ""
+    const name = req.query.name || ""
     const page = parseInt(req.query.page as string) || 1
     const limit = parseInt(req.query.limit as string ) || 10
 
+    console.log(req.query)
     try {
       const skip = (page - 1) * limit;
-      const rol = await repoRoles.find({
+      const roles = await repoRoles.find({
         where: { 
           state: true ,
-          type: Like(`%${type}`)},
+          type: Like(`%${name}%`)},
           skip,
           take: limit,
       });
-      return rol.length > 0
+      return roles.length > 0
         ? res.json({
             ok: true,
             msg: "LIST OF ROLES",
-            rol,
+            roles,
             page,
             limit,
-            totalRoles: rol.length
+            totalRoles: roles.length
           })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", rol });
+        : res.json({ ok: false, msg: "DATA NOT FOUND", roles });
     } catch (e) {
       return res.json({
         ok: false,

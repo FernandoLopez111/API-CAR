@@ -18,7 +18,7 @@ class UserController {
       const user = await userRepository.find({
         where: { 
           state: true, 
-          name: Like(`%${name}`),
+          name: Like(`%${name}%`),
           rol: { 
             type: Like(`%${rol}%`) 
           } 

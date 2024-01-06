@@ -8,18 +8,25 @@ import {Model} from './Model'
 export class Car{
     @PrimaryGeneratedColumn("increment")
     id: number
+
     @ManyToOne(()=> Brand)
     brand: Brand
+
     @RelationId((car:Car)=>car.brand)
     brandId : number
+
     @ManyToOne(()=> Model)
     model: Model
+    
     @RelationId((car:Car)=>car.model)
     modelId : number
+
     @Column()
     color: string
+
     @Column()
     serialnumber : string
+
     @Column({default:true})
     state: boolean
    

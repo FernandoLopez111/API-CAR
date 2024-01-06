@@ -19,7 +19,8 @@ class ClientsController {
 _a = ClientsController;
 ClientsController.listClient = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const name = req.query.name || "";
-    const car = req.query.car || "";
+    const serialNumber = req.query.serialNumber || "";
+    const phone = req.query.phone || "";
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const repoCar = data_source_1.AppDataSource.getRepository(Client_1.Client);
@@ -29,7 +30,8 @@ ClientsController.listClient = (req, res) => __awaiter(void 0, void 0, void 0, f
             where: {
                 state: true,
                 name: (0, typeorm_1.Like)(`%${name}%`),
-                car: { color: (0, typeorm_1.Like)(`%${car}%`) },
+                car: { color: (0, typeorm_1.Like)(`%${serialNumber}%`) },
+                phone: (0, typeorm_1.Like)(`%${phone}%`)
             },
             skip, take: limit,
             relations: { car: true },
@@ -63,7 +65,7 @@ ClientsController.createClient = (req, res) => __awaiter(void 0, void 0, void 0,
             if (!existingCar) {
                 return res.json({
                     ok: false,
-                    msg: `CAR WITH ID '${carId}' DONT NOT EXIST`,
+                    msg: `CAR WITH ID '${carId}' DON'T NOT EXIST`,
                 });
             }
             const client = new Client_1.Client();
@@ -90,15 +92,18 @@ ClientsController.updateClient = (req, res) => __awaiter(void 0, void 0, void 0,
     const repoClient = data_source_1.AppDataSource.getRepository(Client_1.Client);
     const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
     const { carId, name, phone } = req.body;
+    let client;
     try {
-        const client = yield repoClient.findOne({
+        client = yield repoClient.findOne({
             where: { id, state: true },
         });
         if (!client) {
-            throw new Error("CLIENT DONT NOT EXIST IN THE DATABASE");
+            throw new Error("CLIENT DON'T NOT EXIST IN THE DATABASE");
         }
-        const existingRol = yield repoCar.findOne({ where: { id: carId } });
-        if (!existingRol) {
+        const existingCar = yield repoCar.findOne({
+            where: { id: carId }
+        });
+        if (!existingCar) {
             return res.json({
                 ok: false,
                 msg: `CAR WITH ID '${carId}' DOESN'T EXIST`,
@@ -108,8 +113,9 @@ ClientsController.updateClient = (req, res) => __awaiter(void 0, void 0, void 0,
         client.name = name;
         client.phone = phone;
         (yield repoClient.save(client))
-            ? res.json({ ok: true, client, msg: "CLIENT WAS UPDATED" })
-            : res.json({ ok: false, msg: "THE ID DONT EXIST" });
+            ? res.json({ ok: true,
+                client, msg: "CLIENT WAS UPDATED" })
+            : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
     }
     catch (error) {
         return res.json({

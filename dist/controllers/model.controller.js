@@ -22,31 +22,32 @@ ModelController.listModel = (req, res) => __awaiter(void 0, void 0, void 0, func
     const repoModel = data_source_1.AppDataSource.getRepository(Model_1.Model);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    console.log(req.body);
     try {
         const skip = (page - 1) * limit;
-        const model = yield repoModel.find({
-            where: { state: true, typemodel: (0, typeorm_1.Like)(`${name}`) },
-            skip, take: limit,
+        const models = yield repoModel.find({
+            where: { state: true, typemodel: (0, typeorm_1.Like)(`%${name}%`) },
+            skip,
+            take: limit,
         });
-        return model.length > 0
+        return models.length > 0
             ? res.json({
                 ok: true,
-                message: "LIST OF MODELS",
-                model,
+                message: "List of models",
+                models,
                 page,
                 limit,
-                totalModels: model.length
+                totalModels: models.length
             })
             : res.json({
                 ok: false,
-                message: "DATA NOT FOUND ",
-                model,
+                message: " Data not found ",
             });
     }
     catch (error) {
         return res.json({
             ok: false,
-            message: `ERROR ==> ${error}`,
+            message: `error = ${error.message}`,
         });
     }
 });
