@@ -109,13 +109,18 @@ ClientsController.updateClient = (req, res) => __awaiter(void 0, void 0, void 0,
                 msg: `CAR WITH ID '${carId}' DOESN'T EXIST`,
             });
         }
-        client.car = carId;
+        client.car = existingCar;
         client.name = name;
         client.phone = phone;
-        (yield repoClient.save(client))
-            ? res.json({ ok: true,
-                client, msg: "CLIENT WAS UPDATED" })
-            : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
+        yield repoClient.save(client);
+        // ? res.json({ ok: true, 
+        //   client, msg: "CLIENT WAS UPDATED" })
+        // : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
+        return res.json({
+            ok: true,
+            msg: "client was update",
+            client: client,
+        });
     }
     catch (error) {
         return res.json({
