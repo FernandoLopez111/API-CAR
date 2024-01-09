@@ -19,37 +19,39 @@ class RoleController {
 _a = RoleController;
 //metodo de listar
 RoleController.listRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const repoRoles = data_source_1.AppDataSource.getRepository(Rol_1.Rol);
     const name = req.query.name || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
     console.log(req.query);
     try {
-        const skip = (page - 1) * limit;
-        const roles = yield repoRoles.find({
-            where: {
-                state: true,
-                type: (0, typeorm_1.Like)(`%${name}%`)
-            },
-            skip,
+        const [roles, total] = yield roleRepository.findAndCount({
+            where: { state: true, type: (0, typeorm_1.Like)(`%${name}%`) },
+            order: { type: "ASC" },
+            skip: (page - 1) * limit,
             take: limit,
         });
-        return roles.length > 0
-            ? res.json({
+        if (roles.length > 0) {
+            let totalPage = Number(total) / limit;
+            if (totalPage % 1 !== 0) {
+                totalPage = Math.trunc(totalPage) + 1;
+            }
+            let nextPage = page >= totalPage ? page : Number(page) + 1;
+            let prevPage = page <= 1 ? page : page - 1;
+            return res.json({
                 ok: true,
-                msg: "LIST OF ROLES",
                 roles,
-                page,
-                limit,
-                totalRoles: roles.length
-            })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", roles });
+                total,
+                totalPage,
+                currentPage: Number(page),
+                nextPage,
+                prevPage,
+            });
+        }
     }
-    catch (e) {
-        return res.json({
-            ok: false,
-            msg: `ERROR => ${e}`,
-        });
+    catch (error) {
+        ok: false;
+        StatusCode: 500;
+        message: `error = ${error.message}`;
     }
 });
 //metodo de crear

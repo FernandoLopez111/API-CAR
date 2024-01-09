@@ -8,39 +8,44 @@ const roleRepository = AppDataSource.getRepository(Rol);
 class RoleController {
   //metodo de listar
   static listRoles = async (req: Request, res: Response) => {
-    const repoRoles = AppDataSource.getRepository(Rol);
-    const name = req.query.name || ""
-    const page = parseInt(req.query.page as string) || 1
-    const limit = parseInt(req.query.limit as string ) || 10
+    const name = req.query.name || "";
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5;
 
-    console.log(req.query)
+    console.log(req.query);
     try {
-      const skip = (page - 1) * limit;
-      const roles = await repoRoles.find({
-        where: { 
-          state: true ,
-          type: Like(`%${name}%`)},
-          skip,
-          take: limit,
+      const [roles, total] = await roleRepository.findAndCount({
+        where: { state: true, type: Like(`%${name}%`) },
+        order: { type: "ASC" },
+        skip: (page - 1) * limit,
+        take: limit,
       });
-      return roles.length > 0
-        ? res.json({
-            ok: true,
-            msg: "LIST OF ROLES",
-            roles,
-            page,
-            limit,
-            totalRoles: roles.length
-          })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", roles });
-    } catch (e) {
-      return res.json({
-        ok: false,
-        msg: `ERROR => ${e}`,
-      });
+
+      if (roles.length > 0) {
+        let totalPage: number = Number(total) / limit;
+        if (totalPage % 1 !== 0) {
+          totalPage = Math.trunc(totalPage) + 1;
+        }
+        let nextPage: number = page >= totalPage ? page : Number(page) + 1;
+        let prevPage: number = page <= 1 ? page : page - 1;
+
+        return res.json({
+          ok: true,
+          roles,
+          total,
+          totalPage,
+          currentPage: Number(page),
+          nextPage,
+          prevPage,
+        });
+      }
+    } catch (error) {
+      ok: false;
+      StatusCode: 500;
+      message: `error = ${error.message}`;
     }
   };
-  
+
   //metodo de crear
   static createRol = async (req: Request, res: Response) => {
     const { type } = req.body;
