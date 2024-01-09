@@ -4,23 +4,32 @@ import { Client } from './Client'
 export class CarWash{
     @PrimaryGeneratedColumn()
     id: number
+
     @Column()
     type:string
-    @Column()
+
+    @Column({type:'decimal', precision: 5, scale:2, default:0})
     price:number
+
     @ManyToOne(() => Client)
     client: Client;
+
     @RelationId((carwash:CarWash) => carwash.client)
     clientId: number;
+
     @Column()
     amount: number;
+
     @Column()
     @CreateDateColumn()
     date: Date;
-    @Column({ default: 0 })
+
+    @Column({ type:'decimal', precision: 5, scale:2, default:0})
     subTotal: number;
-    @Column({ default: 0 })
+    
+    @Column({type:'decimal', precision: 5, scale:2, default:0})
     total: number;
-   @Column({default:true})
-   state: boolean
+
+    @Column({default:true})
+    state: boolean
   }

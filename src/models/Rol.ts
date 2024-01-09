@@ -8,4 +8,5 @@ export class Rol{
    type: string
    @Column({default:true})
    state: boolean
+  length: number
 }

@@ -24,7 +24,7 @@ __decorate([
     __metadata("design:type", String)
 ], CarWash.prototype, "type", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 5, scale: 2, default: 0 }),
     __metadata("design:type", Number)
 ], CarWash.prototype, "price", void 0);
 __decorate([
@@ -45,11 +45,11 @@ __decorate([
     __metadata("design:type", Date)
 ], CarWash.prototype, "date", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 5, scale: 2, default: 0 }),
     __metadata("design:type", Number)
 ], CarWash.prototype, "subTotal", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
+    (0, typeorm_1.Column)({ type: 'decimal', precision: 5, scale: 2, default: 0 }),
     __metadata("design:type", Number)
 ], CarWash.prototype, "total", void 0);
 __decorate([

@@ -38,6 +38,7 @@ class CarwashController {
       });
     }
   };
+
   static createCarwash = async (req: Request, res: Response) => {
     const { clientId, type, price, amount } = req.body;
     const repoClient = AppDataSource.getRepository(Client);
@@ -96,6 +97,7 @@ class CarwashController {
       });
     }
   };
+
   static updateService = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const repoService = AppDataSource.getRepository(CarWash);
@@ -154,6 +156,7 @@ class CarwashController {
       });
     }
   };
+
   static byIdService = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const repoCarWash = AppDataSource.getRepository(CarWash);
@@ -172,6 +175,7 @@ class CarwashController {
       });
     }
   };
+
   static deleteService = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const repoCarWash = AppDataSource.getRepository(CarWash);
