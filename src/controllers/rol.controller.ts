@@ -16,7 +16,7 @@ class RoleController {
     try {
       const [roles, total] = await roleRepository.findAndCount({
         where: { state: true, type: Like(`%${name}%`) },
-        order: { type: "ASC" },
+        order: { type: "DESC" },
         skip: (page - 1) * limit,
         take: limit,
       });

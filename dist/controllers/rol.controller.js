@@ -26,7 +26,7 @@ RoleController.listRoles = (req, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         const [roles, total] = yield roleRepository.findAndCount({
             where: { state: true, type: (0, typeorm_1.Like)(`%${name}%`) },
-            order: { type: "ASC" },
+            order: { type: "DESC" },
             skip: (page - 1) * limit,
             take: limit,
         });

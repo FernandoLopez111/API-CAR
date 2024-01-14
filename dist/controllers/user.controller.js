@@ -22,35 +22,46 @@ UserController.listUser = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const rol = req.query.rol || "";
     const name = req.query.name || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 30;
+    const limit = parseInt(req.query.limit) || 5;
     const userRepository = data_source_1.AppDataSource.getRepository(User_1.User);
+    console.log(req.query);
     try {
-        const skip = (page - 1) * limit;
-        const user = yield userRepository.find({
+        const [users, total] = yield userRepository.findAndCount({
             where: {
                 state: true,
                 name: (0, typeorm_1.Like)(`%${name}%`),
                 rol: {
-                    type: (0, typeorm_1.Like)(`%${rol}%`)
-                }
+                    type: (0, typeorm_1.Like)(`%${rol}%`),
+                },
             },
+            order: { name: "DESC" },
             relations: { rol: true },
-            skip, take: limit,
+            skip: (page - 1) * limit,
+            take: limit,
         });
-        return user.length > 0
-            ? res.json({
+        if (users.length > 0) {
+            let totalPage = Number(total) / limit;
+            if (totalPage % 1 !== 0) {
+                totalPage = Math.trunc(totalPage) + 1;
+            }
+            let nextPage = page >= totalPage ? page : Number(page) + 1;
+            let prevPage = page <= 1 ? page : page - 1;
+            return res.json({
                 ok: true,
                 msg: "LIST OF USERS",
-                user,
-                page,
-                limit,
-                totalClients: user.length
-            })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", user });
+                users,
+                total,
+                totalPage,
+                currentPage: Number(page),
+                nextPage,
+                prevPage,
+            });
+        }
     }
     catch (error) {
         return res.json({
             ok: false,
+            status_Code: 500,
             msg: `Error => ${error}`,
         });
     }
@@ -63,7 +74,10 @@ UserController.createUser = (req, res) => __awaiter(void 0, void 0, void 0, func
     try {
         const userExist = yield userRepository.findOne({ where: { email } });
         if (userExist) {
-            return res.json({ ok: false, message: `Email '${email}' already exists` });
+            return res.json({
+                ok: false,
+                message: `Email '${email}' already exists`,
+            });
         }
         if (rolId) {
             existingRol = yield repoRol.findOne({ where: { id: rolId } });
@@ -78,7 +92,7 @@ UserController.createUser = (req, res) => __awaiter(void 0, void 0, void 0, func
             if ((existingRol === null || existingRol === void 0 ? void 0 : existingRol.rol) && rolId) {
                 return res.json({
                     ok: false,
-                    msg: 'Cannot assign rol to a regular user'
+                    msg: "Cannot assign rol to a regular user",
                 });
             }
         }

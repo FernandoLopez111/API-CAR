@@ -3,43 +3,57 @@ import { AppDataSource } from "../data-source";
 import { Rol } from "../models/Rol";
 import { User } from "../models/User";
 import { Like } from "typeorm";
-import { Not } from 'typeorm';
+import { Not } from "typeorm";
 
 class UserController {
   static listUser = async (req: Request, res: Response) => {
     const rol = req.query.rol || "";
     const name = req.query.name || "";
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 30;
+    const limit = parseInt(req.query.limit as string) || 5;
     const userRepository = AppDataSource.getRepository(User);
 
+    console.log(req.query);
+
     try {
-      const skip = (page - 1) * limit;
-      const user = await userRepository.find({
-        where: { 
-          state: true, 
+      const [users, total] = await userRepository.findAndCount({
+        where: {
+          state: true,
           name: Like(`%${name}%`),
-          rol: { 
-            type: Like(`%${rol}%`) 
-          } 
+          rol: {
+            type: Like(`%${rol}%`),
+          },
         },
+        order: { name: "DESC" },
         relations: { rol: true },
-        skip, take: limit ,
+        skip: (page - 1) * limit,
+        take: limit,
       });
 
-      return user.length > 0
-        ? res.json({
-            ok: true,
-            msg: "LIST OF USERS",
-            user,
-            page,
-            limit,
-            totalClients: user.length
-          })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", user });
+      if (users.length > 0) {
+        let totalPage: number = Number(total) / limit;
+        if (totalPage % 1 !== 0) {
+          totalPage = Math.trunc(totalPage) + 1;
+        }
+
+        let nextPage: number = page >= totalPage ? page : Number(page) + 1;
+        let prevPage: number = page <= 1 ? page : page - 1;
+
+        return res.json({
+          ok: true,
+          msg: "LIST OF USERS",
+          users,
+          total,
+          totalPage,
+          currentPage: Number(page),
+          nextPage,
+          prevPage,
+        });
+      }
     } catch (error) {
       return res.json({
         ok: false,
+        status_Code: 500,
         msg: `Error => ${error}`,
       });
     }
@@ -52,9 +66,12 @@ class UserController {
     let existingRol;
 
     try {
-      const userExist = await userRepository.findOne({where: {email}})
-      if(userExist){
-        return res.json({ok: false, message: `Email '${email}' already exists` })
+      const userExist = await userRepository.findOne({ where: { email } });
+      if (userExist) {
+        return res.json({
+          ok: false,
+          message: `Email '${email}' already exists`,
+        });
       }
 
       if (rolId) {
@@ -65,12 +82,12 @@ class UserController {
             msg: `ROL WITH ID '${rolId}' DON'T EXIST`,
           });
         }
-      } else{
-        if(existingRol?.rol && rolId){
+      } else {
+        if (existingRol?.rol && rolId) {
           return res.json({
             ok: false,
-            msg: 'Cannot assign rol to a regular user'
-          })
+            msg: "Cannot assign rol to a regular user",
+          });
         }
       }
 
@@ -101,7 +118,7 @@ class UserController {
     const userRepository = AppDataSource.getRepository(User);
     const repoRol = AppDataSource.getRepository(Rol);
     const { rolId, name, email, password } = req.body;
-    let user: User
+    let user: User;
 
     try {
       user = await userRepository.findOne({
@@ -111,16 +128,16 @@ class UserController {
       if (!user) {
         throw new Error("USER DON'T EXIST IN THE DATABASE");
       }
-      
-      const existingUser = await userRepository.findOne({
-        where: {email, id: Not(id)},
-      })
 
-      if(existingUser){
+      const existingUser = await userRepository.findOne({
+        where: { email, id: Not(id) },
+      });
+
+      if (existingUser) {
         return res.json({
           ok: false,
           msg: `Email with ID '${email}' already exist`,
-        })
+        });
       }
 
       const existingRol = await repoRol.findOne({ where: { id: rolId } });
@@ -187,7 +204,7 @@ class UserController {
       user.state = false;
 
       await userRepository.save(user);
-      
+
       return res.json({
         ok: true,
         msg: "USER WAS DELETE",

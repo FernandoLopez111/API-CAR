@@ -7,30 +7,48 @@ import { Like } from "typeorm";
 class CarwashController {
   static listCarwash = async (req: Request, res: Response) => {
     const type = req.query.type || "";
+    const client = req.query.client || "";
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || 5;
     const repoCarwash = AppDataSource.getRepository(CarWash);
 
+    console.log(req.query)
     try {
-      const skip = (page - 1) * limit;
-      const carwash = await repoCarwash.find({
+      
+      const [carwashs, total] = await repoCarwash.findAndCount({
         where: {
           state: true,
           type: Like(`%${type}%`),
+          client: {
+            name: Like(`%${client}%`)
+          }
         },
-        skip, take: limit ,
+        order: {type: "DESC"}, 
+        skip: (page - 1) * limit,
+        take: limit ,
         relations:{client:true}
       });
-      return carwash.length > 0
-        ? res.json({
-            ok: true,
-            msg: "LIST OF SERVICES",
-            carwash,
-            page,
-            limit,
-            totalCarWash: carwash.length
-          })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", carwash });
+
+      if (carwashs.length > 0) {
+        let totalPage: number = Number(total) / limit;
+        if (totalPage % 1 !== 0) {
+          totalPage = Math.trunc(totalPage) + 1;
+        }
+
+        let nextPage: number = page >= totalPage ? page : Number(page) + 1;
+        let prevPage: number = page <= 1 ? page : page - 1;
+
+        return res.json({
+          ok: true,
+          msg: "List of carwashs",
+          carwashs,
+          total,
+          totalPage,
+          currentPage: Number(page),
+          nextPage,
+          prevPage,
+        });
+      }
     } catch (error) {
       return res.json({
         ok: false,

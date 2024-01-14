@@ -11,61 +11,56 @@ class CarsController {
     const brand = req.query.brand || "";
     const model = req.query.model || "";
     const serialNumber = req.query.serialNumber || "";
-
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5;
     const repoCar = AppDataSource.getRepository(Car);
+
+    console.log(req.query)
     try {
-      const car = await repoCar.find({
+      const [cars, total] = await repoCar.findAndCount({
         where: {
           state: true,
           color: Like(`%${color}%`),
-          brand: Like(`%${brand}%`) ,
-          model: Like(`%${model}%`) ,
-          serialnumber: Like(`%${serialNumber}%`)
+          serialnumber: Like(`%${serialNumber}%`),
+          brand: {
+            type: Like(`%${brand}%`)
+          },
+          model: {
+            typemodel: Like(`%${model}%`)
+          }
         },
+        order: {serialnumber: "DESC"},
         relations: { brand: true, model: true },
+        skip: (page - 1 ) * limit,
+        take: limit,
       });
-      return car.length > 0
-        ? res.json({
-            ok: true,
-            msg: "LIST OF CARS",
-            car,
-          })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", car });
-    } catch (error) {
+
+      if(cars.length > 0){
+        let totalPage: number = Number(total) / limit;
+        if(totalPage % 1 !== 0){
+          totalPage = Math.trunc(totalPage) + 1;
+        }
+
+        let nextPage: number = page >= totalPage ? page : Number(page) + 1;
+        let prevPage: number = page <= 1 ? page : page - 1;
+
+        return res.json({
+          ok: true,
+          msg: "List of cars",
+          cars,
+          total,
+          totalPage,
+          currentPage: Number(page),
+          nextPage,
+          prevPage,
+        });
+      }} catch (error) {
       return res.json({
         ok: false,
         message: `ERROR ==> ${error}`,
       });
     }
   };
-
-  //metodo de obtener todos
-  //  static listCars = async(req: Request, res: Response)=>{
-  //    const color = req.query.color || ""
-  //     const serialnumber = req.query.serialnumber || ""
-  //         const repoCars = AppDataSource.getRepository(Car);
-  //         try {
-  //             const car = await repoCars.find({
-  //                 where:{state:true,
-  //                 color: Like(`%${color}%`),
-  //                 serialnumber: Like(`%${serialnumber}%`)
-  //                 },
-  //             });
-  //             return car.length>0
-  //             ? res.json({
-  //                 ok: true,
-  //                 msg: "LIST OF CARS",
-  //                 car
-  //             })
-  //             : res.json({ok:false, msg:"DATA NOT FOUND", car});
-  //         } catch (error) {
-  //             return res.json({
-  //                 ok:false,
-  //                 msg: `ERROR ==> ${error}`,
-  //             });
-  //         }
-
-  //     }
 
   //crear carro
   static createCar = async (req: Request, res: Response) => {

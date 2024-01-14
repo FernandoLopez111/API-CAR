@@ -21,34 +21,37 @@ ModelController.listModel = (req, res) => __awaiter(void 0, void 0, void 0, func
     const name = req.query.name || "";
     const repoModel = data_source_1.AppDataSource.getRepository(Model_1.Model);
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
     console.log(req.body);
     try {
-        const skip = (page - 1) * limit;
-        const models = yield repoModel.find({
+        const [models, total] = yield repoModel.findAndCount({
             where: { state: true, typemodel: (0, typeorm_1.Like)(`%${name}%`) },
-            skip,
+            order: { typemodel: "DESC" },
+            skip: (page - 1) * limit,
             take: limit,
         });
-        return models.length > 0
-            ? res.json({
+        if (models.length > 0) {
+            let totalPage = Number(total) / limit;
+            if (totalPage % 1 !== 0) {
+                totalPage = Math.trunc(totalPage) + 1;
+            }
+            let nextPage = page >= totalPage ? page : Number(page) + 1;
+            let prevPage = page <= 1 ? page : page - 1;
+            return res.json({
                 ok: true,
-                message: "List of models",
                 models,
-                page,
-                limit,
-                totalModels: models.length
-            })
-            : res.json({
-                ok: false,
-                message: " Data not found ",
+                total,
+                totalPage,
+                currentPage: Number(page),
+                nextPage,
+                prevPage,
             });
+        }
     }
     catch (error) {
-        return res.json({
-            ok: false,
-            message: `error = ${error.message}`,
-        });
+        ok: false;
+        StatusCode: 500;
+        message: `error = ${error.message}`;
     }
 });
 //metodo de crear

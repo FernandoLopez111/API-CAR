@@ -23,25 +23,46 @@ CarsController.listCars = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const brand = req.query.brand || "";
     const model = req.query.model || "";
     const serialNumber = req.query.serialNumber || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
     const repoCar = data_source_1.AppDataSource.getRepository(Car_1.Car);
+    console.log(req.query);
     try {
-        const car = yield repoCar.find({
+        const [cars, total] = yield repoCar.findAndCount({
             where: {
                 state: true,
                 color: (0, typeorm_1.Like)(`%${color}%`),
-                brand: (0, typeorm_1.Like)(`%${brand}%`),
-                model: (0, typeorm_1.Like)(`%${model}%`),
-                serialnumber: (0, typeorm_1.Like)(`%${serialNumber}%`)
+                serialnumber: (0, typeorm_1.Like)(`%${serialNumber}%`),
+                brand: {
+                    type: (0, typeorm_1.Like)(`%${brand}%`)
+                },
+                model: {
+                    typemodel: (0, typeorm_1.Like)(`%${model}%`)
+                }
             },
+            order: { serialnumber: "DESC" },
             relations: { brand: true, model: true },
+            skip: (page - 1) * limit,
+            take: limit,
         });
-        return car.length > 0
-            ? res.json({
+        if (cars.length > 0) {
+            let totalPage = Number(total) / limit;
+            if (totalPage % 1 !== 0) {
+                totalPage = Math.trunc(totalPage) + 1;
+            }
+            let nextPage = page >= totalPage ? page : Number(page) + 1;
+            let prevPage = page <= 1 ? page : page - 1;
+            return res.json({
                 ok: true,
-                msg: "LIST OF CARS",
-                car,
-            })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", car });
+                msg: "List of cars",
+                cars,
+                total,
+                totalPage,
+                currentPage: Number(page),
+                nextPage,
+                prevPage,
+            });
+        }
     }
     catch (error) {
         return res.json({
@@ -50,32 +71,6 @@ CarsController.listCars = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
 });
-//metodo de obtener todos
-//  static listCars = async(req: Request, res: Response)=>{
-//    const color = req.query.color || ""
-//     const serialnumber = req.query.serialnumber || ""
-//         const repoCars = AppDataSource.getRepository(Car);
-//         try {
-//             const car = await repoCars.find({
-//                 where:{state:true,
-//                 color: Like(`%${color}%`),
-//                 serialnumber: Like(`%${serialnumber}%`)
-//                 },
-//             });
-//             return car.length>0
-//             ? res.json({
-//                 ok: true,
-//                 msg: "LIST OF CARS",
-//                 car
-//             })
-//             : res.json({ok:false, msg:"DATA NOT FOUND", car});
-//         } catch (error) {
-//             return res.json({
-//                 ok:false,
-//                 msg: `ERROR ==> ${error}`,
-//             });
-//         }
-//     }
 //crear carro
 CarsController.createCar = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { brandId, modelId, color, serialnumber } = req.body;

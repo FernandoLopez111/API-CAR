@@ -9,35 +9,39 @@ class ModelController {
     const name = req.query.name || "";
     const repoModel = AppDataSource.getRepository(Model);
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || 5;
 
     console.log(req.body);
     
     try {
-      const skip = (page - 1) * limit;
-      const models = await repoModel.find({
+      const [models, total] = await repoModel.findAndCount({
         where: { state: true, typemodel:Like(`%${name}%`) },
-        skip, 
+        order: { typemodel: "DESC"},
+        skip: (page -1 ) * limit, 
         take: limit ,
       });
-      return models.length > 0
-        ? res.json({
-            ok: true,
-            message: "List of models",
-            models,
-            page,
-            limit,
-            totalModels: models.length
-          })
-        : res.json({
-            ok: false,
-            message: " Data not found ",
-          });
+      if (models.length > 0) {
+        let totalPage: number = Number(total) / limit;
+        if (totalPage % 1 !== 0) {
+          totalPage = Math.trunc(totalPage) + 1;
+        }
+        let nextPage: number = page >= totalPage ? page : Number(page) + 1;
+        let prevPage: number = page <= 1 ? page : page - 1;
+
+        return res.json({
+          ok: true,
+          models,
+          total,
+          totalPage,
+          currentPage: Number(page),
+          nextPage,
+          prevPage,
+        });
+      }
     } catch (error) {
-      return res.json({
-        ok: false,
-        message: `error = ${error.message}`,
-      });
+      ok: false;
+      StatusCode: 500;
+      message: `error = ${error.message}`;
     }
   };
 

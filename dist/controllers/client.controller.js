@@ -22,34 +22,45 @@ ClientsController.listClient = (req, res) => __awaiter(void 0, void 0, void 0, f
     const serialNumber = req.query.serialNumber || "";
     const phone = req.query.phone || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
     const repoCar = data_source_1.AppDataSource.getRepository(Client_1.Client);
+    console.log(req.query);
     try {
-        const skip = (page - 1) * limit;
-        const client = yield repoCar.find({
+        const [clients, total] = yield repoCar.findAndCount({
             where: {
                 state: true,
                 name: (0, typeorm_1.Like)(`%${name}%`),
-                car: { color: (0, typeorm_1.Like)(`%${serialNumber}%`) },
+                car: { serialnumber: (0, typeorm_1.Like)(`%${serialNumber}%`) },
                 phone: (0, typeorm_1.Like)(`%${phone}%`)
             },
-            skip, take: limit,
+            order: { name: "DESC" },
+            skip: (page - 1) * limit,
+            take: limit,
             relations: { car: true },
         });
-        return client.length > 0
-            ? res.json({
+        if (clients.length > 0) {
+            let totalPage = Number(total) / limit;
+            if (totalPage % 1 !== 0) {
+                totalPage = Math.trunc(totalPage) + 1;
+            }
+            let nextPage = page >= totalPage ? page : Number(page) + 1;
+            let prevPage = page <= 1 ? page : page - 1;
+            return res.json({
                 ok: true,
                 msg: "LIST OF CLIENTS",
-                client,
-                page,
-                limit,
-                totalClients: client.length
-            })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", client });
+                clients,
+                total,
+                totalPage,
+                currentPage: Number(page),
+                nextPage,
+                prevPage,
+            });
+        }
     }
     catch (error) {
         return res.json({
             ok: false,
+            estatus_code: 500,
             msg: `ERROR ==> ${error}`,
         });
     }
@@ -113,9 +124,6 @@ ClientsController.updateClient = (req, res) => __awaiter(void 0, void 0, void 0,
         client.name = name;
         client.phone = phone;
         yield repoClient.save(client);
-        // ? res.json({ ok: true, 
-        //   client, msg: "CLIENT WAS UPDATED" })
-        // : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
         return res.json({
             ok: true,
             msg: "client was update",

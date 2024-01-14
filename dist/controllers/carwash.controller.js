@@ -19,29 +19,43 @@ class CarwashController {
 _a = CarwashController;
 CarwashController.listCarwash = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const type = req.query.type || "";
+    const client = req.query.client || "";
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 5;
     const repoCarwash = data_source_1.AppDataSource.getRepository(CarWash_1.CarWash);
+    console.log(req.query);
     try {
-        const skip = (page - 1) * limit;
-        const carwash = yield repoCarwash.find({
+        const [carwashs, total] = yield repoCarwash.findAndCount({
             where: {
                 state: true,
                 type: (0, typeorm_1.Like)(`%${type}%`),
+                client: {
+                    name: (0, typeorm_1.Like)(`%${client}%`)
+                }
             },
-            skip, take: limit,
+            order: { type: "DESC" },
+            skip: (page - 1) * limit,
+            take: limit,
             relations: { client: true }
         });
-        return carwash.length > 0
-            ? res.json({
+        if (carwashs.length > 0) {
+            let totalPage = Number(total) / limit;
+            if (totalPage % 1 !== 0) {
+                totalPage = Math.trunc(totalPage) + 1;
+            }
+            let nextPage = page >= totalPage ? page : Number(page) + 1;
+            let prevPage = page <= 1 ? page : page - 1;
+            return res.json({
                 ok: true,
-                msg: "LIST OF SERVICES",
-                carwash,
-                page,
-                limit,
-                totalCarWash: carwash.length
-            })
-            : res.json({ ok: false, msg: "DATA NOT FOUND", carwash });
+                msg: "List of carwashs",
+                carwashs,
+                total,
+                totalPage,
+                currentPage: Number(page),
+                nextPage,
+                prevPage,
+            });
+        }
     }
     catch (error) {
         return res.json({

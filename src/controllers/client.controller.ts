@@ -10,38 +10,55 @@ class ClientsController {
     const serialNumber = req.query.serialNumber || "";
     const phone = req.query.phone || "";
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const limit = parseInt(req.query.limit as string) || 5;
     const repoCar = AppDataSource.getRepository(Client);
+
+    console.log(req.query)
     try {
-      const skip = (page - 1) * limit;
-      const client = await repoCar.find({
+      const [clients, total] = await repoCar.findAndCount({
         where: {
           state: true,
           name: Like(`%${name}%`),
-          car: { color: Like(`%${serialNumber}%`) },
+          car: { serialnumber: Like(`%${serialNumber}%`) },
           phone: Like(`%${phone}%`)
         },
-        skip, take: limit ,
+        order: { name: "DESC"},
+        skip: (page - 1 ) * limit, 
+        take: limit ,
         relations: { car: true },
         
       });
-      return client.length > 0
-        ? res.json({
+
+
+      if(clients.length > 0){
+        let totalPage: number = Number(total) / limit;
+        if(totalPage % 1 !== 0){
+          totalPage = Math.trunc(totalPage) + 1;
+        } 
+
+        let nextPage: number = page >= totalPage ? page : Number(page) + 1;
+        let prevPage: number = page <= 1 ? page: page - 1;
+
+        return res.json({
             ok: true,
             msg: "LIST OF CLIENTS",
-            client,
-            page,
-            limit,
-            totalClients: client.length
+            clients,
+            total,
+            totalPage,
+            currentPage: Number(page),
+            nextPage,
+            prevPage,
           })
-        : res.json({ ok: false, msg: "DATA NOT FOUND", client });
+      }
     } catch (error) {
       return res.json({
         ok: false,
+        estatus_code: 500,
         msg: `ERROR ==> ${error}`,
       });
     }
   };
+
   static createClient = async (req: Request, res: Response) => {
     const { carId, name, phone } = req.body;
     const repoClient = AppDataSource.getRepository(Client);
@@ -106,9 +123,6 @@ class ClientsController {
       client.phone = phone;
 
       await repoClient.save(client)
-        // ? res.json({ ok: true, 
-        //   client, msg: "CLIENT WAS UPDATED" })
-        // : res.json({ ok: false, msg: "THE ID DON'T EXIST" });
         return res.json({
           ok: true,
           msg: "client was update",
@@ -121,6 +135,7 @@ class ClientsController {
       });
     }
   };
+
   static byIdClient = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const repoClient = AppDataSource.getRepository(Client);
